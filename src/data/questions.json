@@ -1,0 +1,37 @@
+[
+  {
+    "id": "action",
+    "text": "Do you enjoy action-packed stories with lots of fighting and adventure?",
+    "icon": "⚔️"
+  },
+  {
+    "id": "humor",
+    "text": "Do you like stories that make you laugh?",
+    "icon": "😂"
+  },
+  {
+    "id": "dark",
+    "text": "Are you comfortable with darker, more mature themes?",
+    "icon": "🌑"
+  },
+  {
+    "id": "scifi",
+    "text": "Are you interested in science fiction or futuristic settings?",
+    "icon": "🚀"
+  },
+  {
+    "id": "fantasy",
+    "text": "Do you enjoy fantasy worlds with magic and mythical creatures?",
+    "icon": "🧙"
+  },
+  {
+    "id": "realistic",
+    "text": "Do you prefer stories grounded in the real world?",
+    "icon": "🌍"
+  },
+  {
+    "id": "ongoing",
+    "text": "Would you rather read a finished series than one still being published?",
+    "icon": "📚"
+  }
+]
