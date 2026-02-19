@@ -1,12 +1,33 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { BookOpen } from "lucide-react";
+import LoadingScreen from "@/components/LoadingScreen";
+import QuizWizard from "@/components/QuizWizard";
+import { usePyodide } from "@/hooks/usePyodide";
 
 const Index = () => {
+  const { loading, error } = usePyodide();
+
+  if (loading || error) {
+    return <LoadingScreen loading={loading} error={error} />;
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <header className="border-b border-border bg-card py-4">
+        <div className="container flex items-center justify-center gap-3">
+          <BookOpen className="h-7 w-7 text-accent" />
+          <h1 className="text-2xl font-bold tracking-tight">
+            Comic Book Starter Guide
+          </h1>
+        </div>
+      </header>
+
+      <main className="container py-10 px-4">
+        <QuizWizard />
+      </main>
+
+      <footer className="border-t border-border py-6 text-center text-sm text-muted-foreground">
+        Powered by Python (Pyodide) running in your browser ✨
+      </footer>
     </div>
   );
 };
