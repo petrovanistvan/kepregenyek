@@ -54,8 +54,21 @@ def recommend(answers_json: str, comics_json: str) -> str:
     comics = json.loads(comics_json)
 
     # Step 1: Filter by publisher
-    universe = "DC" if answers.get("dc") else "Marvel"
-    filtered = filter_by_publisher(comics, universe)
+    likes_dc = answers.get("dc", False)
+    likes_marvel = answers.get("marvel", False)
+
+    if likes_dc and likes_marvel:
+        filtered = comics[:]
+        universe = "DC & Marvel"
+    elif likes_dc:
+        filtered = filter_by_publisher(comics, "DC")
+        universe = "DC"
+    elif likes_marvel:
+        filtered = filter_by_publisher(comics, "Marvel")
+        universe = "Marvel"
+    else:
+        filtered = comics[:]
+        universe = "DC & Marvel"
 
     # Step 2: Apply preference filters
     if answers.get("short"):
@@ -108,6 +121,7 @@ def recommend(answers_json: str, comics_json: str) -> str:
 
     labels = {
         "dc": "DC univerzum",
+        "marvel": "Marvel univerzum",
         "short": "rövidebb kötetek",
         "budget": "kedvező ár/oldal arány",
         "modern": "modern (2000+) kiadványok",
@@ -115,9 +129,7 @@ def recommend(answers_json: str, comics_json: str) -> str:
     }
 
     reasoning = f"Választott univerzum: {universe}. "
-    prefs = [labels.get(k, k) for k in yes_list if k != "dc"]
-    if not answers.get("dc"):
-        prefs_no_dc = [labels.get(k, k) for k in yes_list]
+    prefs = [labels.get(k, k) for k in yes_list if k not in ("dc", "marvel")]
     if prefs:
         reasoning += "Preferenciáid: " + ", ".join(prefs) + ". "
     reasoning += f"Az adatbázisból {len(top)} kötetet válogattunk neked, értékelés és ár-érték arány alapján rangsorolva."
