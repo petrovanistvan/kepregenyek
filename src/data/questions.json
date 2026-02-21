@@ -1,37 +1,27 @@
 [
   {
-    "id": "action",
-    "text": "Do you enjoy action-packed stories with lots of fighting and adventure?",
-    "icon": "⚔️"
+    "id": "dc",
+    "text": "Inkább a DC univerzumot kedveled? (Nem = Marvel)",
+    "icon": "🦇"
   },
   {
-    "id": "humor",
-    "text": "Do you like stories that make you laugh?",
-    "icon": "😂"
+    "id": "short",
+    "text": "Rövidebb köteteket preferálsz (max ~200 oldal)?",
+    "icon": "📖"
   },
   {
-    "id": "dark",
-    "text": "Are you comfortable with darker, more mature themes?",
-    "icon": "🌑"
+    "id": "budget",
+    "text": "Fontos számodra az ár-érték arány (olcsóbb oldalonként)?",
+    "icon": "💰"
   },
   {
-    "id": "scifi",
-    "text": "Are you interested in science fiction or futuristic settings?",
-    "icon": "🚀"
+    "id": "modern",
+    "text": "Inkább modern (2000 utáni) képregényeket keresel?",
+    "icon": "🆕"
   },
   {
-    "id": "fantasy",
-    "text": "Do you enjoy fantasy worlds with magic and mythical creatures?",
-    "icon": "🧙"
-  },
-  {
-    "id": "realistic",
-    "text": "Do you prefer stories grounded in the real world?",
-    "icon": "🌍"
-  },
-  {
-    "id": "ongoing",
-    "text": "Would you rather read a finished series than one still being published?",
-    "icon": "📚"
+    "id": "top_rated",
+    "text": "Csak a legjobban értékelt címek érdekelnek (4.7+ rating)?",
+    "icon": "⭐"
   }
 ]
