@@ -1,133 +1,131 @@
+# -*- coding: utf-8 -*-
 import json
+import math
+from typing import List, Dict
 
-def recommend(answers_json: str) -> str:
-    """
-    Takes a JSON string of answers (dict of question_id -> bool)
-    and returns a JSON string with recommendations.
+# === utils logic (embedded for Pyodide) ===
 
-    Replace this placeholder logic with your own recommendation engine.
-    The interface contract:
-      Input:  {"action": true, "humor": false, ...}
-      Output: {"title": "...", "recommendations": [...], "reasoning": "..."}
-    Each recommendation: {"title": "...", "description": "...", "why": "..."}
-    """
+def filter_by_publisher(items: List[Dict], publisher: str) -> List[Dict]:
+    return [c for c in items if c.get('publisher','').lower() == publisher.lower()]
+
+
+def price_per_page(c: Dict) -> float:
+    price = c.get('price_huf')
+    pages = c.get('pages')
+    if not price or not pages or pages <= 0:
+        return math.inf
+    return price / pages
+
+
+def roi_proxy(c: Dict) -> float:
+    price = c.get('price_huf') or 0
+    pages = c.get('pages') or 0
+    rating = c.get('rating') or 0
+    if price <= 0:
+        return 0.0
+    return (rating * pages) / price
+
+
+def rank(items: List[Dict]) -> List[Dict]:
+    def key(c):
+        return (-float(c.get('rating', 0)), price_per_page(c), -int(c.get('year', 0)))
+    return sorted(items, key=key)
+
+
+def enrich(items: List[Dict]) -> List[Dict]:
+    out = []
+    for c in items:
+        e = c.copy()
+        e['price_per_page'] = None if price_per_page(c) == math.inf else round(price_per_page(c), 2)
+        e['roi_proxy'] = round(roi_proxy(c), 4)
+        out.append(e)
+    return out
+
+
+def neutral_summary_stub(title: str, publisher: str, year: int, pages: int) -> str:
+    return (f"A(z) '{title}' egy {year}-ben megjelent {publisher} kiadvány. "
+            f"A kötet terjedelme {pages} oldal.")
+
+
+# === Main recommender ===
+
+def recommend(answers_json: str, comics_json: str) -> str:
     answers = json.loads(answers_json)
+    comics = json.loads(comics_json)
 
+    # Step 1: Filter by publisher
+    universe = "DC" if answers.get("dc") else "Marvel"
+    filtered = filter_by_publisher(comics, universe)
+
+    # Step 2: Apply preference filters
+    if answers.get("short"):
+        filtered = [c for c in filtered if c.get('pages', 0) <= 200]
+
+    if answers.get("budget"):
+        filtered = [c for c in filtered if price_per_page(c) < 50]
+
+    if answers.get("modern"):
+        filtered = [c for c in filtered if c.get('year', 0) >= 2000]
+
+    if answers.get("top_rated"):
+        high = [c for c in filtered if c.get('rating', 0) >= 4.7]
+        if high:
+            filtered = high
+
+    # Step 3: Rank and enrich
+    ranked = enrich(rank(filtered))
+
+    # Fallback: if filters too strict, show all from universe
+    if not ranked:
+        ranked = enrich(rank(filter_by_publisher(comics, universe)))
+
+    top = ranked[:8]
+
+    # Build recommendations
     recs = []
+    for c in top:
+        ppp = c.get('price_per_page')
+        ppp_str = f"{ppp} Ft/oldal" if ppp is not None else "–"
+        chars = ", ".join(c.get('characters', []))
 
-    if answers.get("action"):
         recs.append({
-            "title": "Invincible",
-            "description": "A coming-of-age superhero story that starts familiar, then takes shocking turns.",
-            "why": "You like action — Invincible delivers jaw-dropping fight scenes with real consequences."
-        })
-        recs.append({
-            "title": "Batman: Year One",
-            "description": "Frank Miller's grounded take on Bruce Wayne's first year as Batman.",
-            "why": "An action-packed origin story that redefined the Dark Knight."
-        })
-
-    if answers.get("humor"):
-        recs.append({
-            "title": "Scott Pilgrim",
-            "description": "A slacker musician must defeat his new girlfriend's seven evil exes.",
-            "why": "It's hilarious, quirky, and full of video-game-style energy."
-        })
-        recs.append({
-            "title": "Squirrel Girl",
-            "description": "Doreen Green fights villains with the power of squirrels — and empathy.",
-            "why": "Light-hearted, funny, and perfect for readers who don't take things too seriously."
-        })
-
-    if answers.get("dark"):
-        recs.append({
-            "title": "Watchmen",
-            "description": "The genre-defining deconstruction of superheroes in a Cold War world.",
-            "why": "A mature, layered masterpiece that explores what 'heroism' really means."
-        })
-        recs.append({
-            "title": "Saga",
-            "description": "An epic space opera about two soldiers from warring races who fall in love.",
-            "why": "Beautiful, brutal, and emotionally raw — one of the best modern comics."
-        })
-
-    if answers.get("scifi"):
-        recs.append({
-            "title": "Paper Girls",
-            "description": "Four paper delivery girls stumble into a time-travel conflict in 1988.",
-            "why": "A nostalgic sci-fi adventure with twists you won't see coming."
-        })
-
-    if answers.get("fantasy"):
-        recs.append({
-            "title": "Bone",
-            "description": "Three cartoon cousins get lost in a vast fantasy world full of danger and humor.",
-            "why": "An all-ages fantasy epic — think Lord of the Rings meets cartoon comedy."
-        })
-        recs.append({
-            "title": "Monstress",
-            "description": "A young woman navigates a war-torn world of gods and monsters.",
-            "why": "Stunning art and deep world-building for fantasy lovers."
-        })
-
-    if answers.get("realistic"):
-        recs.append({
-            "title": "Maus",
-            "description": "Art Spiegelman's Pulitzer-winning memoir of his father's Holocaust survival.",
-            "why": "A powerful true story told through comics — essential reading."
-        })
-        recs.append({
-            "title": "Persepolis",
-            "description": "Marjane Satrapi's memoir of growing up during the Iranian Revolution.",
-            "why": "Real-world, deeply personal, and beautifully illustrated."
-        })
-
-    if answers.get("ongoing") is False:
-        # Prefers ongoing series
-        ongoing = [
-            {
-                "title": "One Piece (Manga)",
-                "description": "The best-selling manga of all time — a pirate adventure of epic scope.",
-                "why": "Still running and consistently excellent; perfect if you want a long journey."
+            "title": c['title'],
+            "description": (
+                f"{c['publisher']} · {c['year']} · {c['pages']} oldal · "
+                f"{c['price_huf']} Ft · ⭐ {c['rating']}"
+            ),
+            "why": neutral_summary_stub(c['title'], c['publisher'], c['year'], c['pages']),
+            "details": {
+                "price_per_page": ppp_str,
+                "roi": c.get('roi_proxy', 0),
+                "characters": chars
             }
-        ]
-        recs.extend(ongoing)
+        })
 
-    # Fallback if nothing matched
-    if not recs:
-        recs = [
-            {
-                "title": "Saga",
-                "description": "An epic space opera mixing sci-fi and fantasy with deep emotion.",
-                "why": "A universally loved starting point for new comic readers."
-            },
-            {
-                "title": "Ms. Marvel (Kamala Khan)",
-                "description": "A Pakistani-American teen discovers she has superpowers.",
-                "why": "Relatable, fun, and a great entry into the Marvel universe."
-            },
-            {
-                "title": "Bone",
-                "description": "Three cartoon cousins lost in a vast fantasy world.",
-                "why": "Charming and accessible — great for any taste."
-            }
-        ]
+    # Reasoning
+    yes_list = [k for k, v in answers.items() if v]
+    no_list = [k for k, v in answers.items() if not v]
 
-    # Build reasoning summary
-    yes_answers = [k for k, v in answers.items() if v]
-    no_answers = [k for k, v in answers.items() if not v]
+    labels = {
+        "dc": "DC univerzum",
+        "short": "rövidebb kötetek",
+        "budget": "kedvező ár/oldal arány",
+        "modern": "modern (2000+) kiadványok",
+        "top_rated": "kiemelkedő értékelésű címek"
+    }
 
-    reasoning = "Based on your preferences: "
-    if yes_answers:
-        reasoning += "you enjoy " + ", ".join(yes_answers) + ". "
-    if no_answers:
-        reasoning += "You're less interested in " + ", ".join(no_answers) + ". "
-    reasoning += f"We picked {len(recs)} comics that match your taste."
+    reasoning = f"Választott univerzum: {universe}. "
+    prefs = [labels.get(k, k) for k in yes_list if k != "dc"]
+    if not answers.get("dc"):
+        prefs_no_dc = [labels.get(k, k) for k in yes_list]
+    if prefs:
+        reasoning += "Preferenciáid: " + ", ".join(prefs) + ". "
+    reasoning += f"Az adatbázisból {len(top)} kötetet válogattunk neked, értékelés és ár-érték arány alapján rangsorolva."
 
     result = {
-        "title": "Your Personalized Reading List",
-        "recommendations": recs[:8],
+        "title": f"Top {universe} ajánlatok neked",
+        "recommendations": recs,
         "reasoning": reasoning
     }
 
-    return json.dumps(result)
+    return json.dumps(result, ensure_ascii=False)

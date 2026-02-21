@@ -44,8 +44,8 @@ const QuizWizard = () => {
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="text-center animate-fade-in">
           <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-accent" />
-          <h2 className="text-xl font-bold">Finding your perfect comics…</h2>
-          <p className="text-muted-foreground">Running the recommendation engine</p>
+          <h2 className="text-xl font-bold">Ajánlatok keresése…</h2>
+          <p className="text-muted-foreground">Az ajánlómotor dolgozik</p>
         </div>
       </div>
     );
@@ -56,13 +56,13 @@ const QuizWizard = () => {
     return (
       <div className="mx-auto max-w-md text-center">
         <div className="comic-panel p-8">
-          <p className="mb-4 text-lg font-bold text-destructive">Something went wrong</p>
+          <p className="mb-4 text-lg font-bold text-destructive">Hiba történt</p>
           <p className="mb-6 text-sm text-muted-foreground">{error}</p>
           <button
             onClick={handleRestart}
             className="rounded-md bg-primary px-6 py-2 font-semibold text-primary-foreground"
           >
-            Try Again
+            Újra
           </button>
         </div>
       </div>
@@ -100,13 +100,13 @@ const QuizWizard = () => {
           disabled={currentIndex === 0}
           className="flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30"
         >
-          <ArrowLeft className="h-4 w-4" /> Back
+          <ArrowLeft className="h-4 w-4" /> Vissza
         </button>
         <button
           onClick={handleRestart}
           className="flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
-          <RotateCcw className="h-4 w-4" /> Restart
+          <RotateCcw className="h-4 w-4" /> Újrakezdés
         </button>
       </div>
     </div>

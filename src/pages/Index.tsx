@@ -16,7 +16,7 @@ const Index = () => {
         <div className="container flex items-center justify-center gap-3">
           <BookOpen className="h-7 w-7 text-accent" />
           <h1 className="text-2xl font-bold tracking-tight">
-            Comic Book Starter Guide
+            DC / Marvel Ajánló
           </h1>
         </div>
       </header>
@@ -26,7 +26,7 @@ const Index = () => {
       </main>
 
       <footer className="border-t border-border py-6 text-center text-sm text-muted-foreground">
-        Powered by Python (Pyodide) running in your browser ✨
+        Python (Pyodide) · Böngészőben futó ajánlórendszer ✨
       </footer>
     </div>
   );

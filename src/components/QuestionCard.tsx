@@ -21,14 +21,14 @@ const QuestionCard = ({ question, onAnswer }: QuestionCardProps) => {
           className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-success py-4 text-lg font-bold text-success-foreground transition-transform hover:scale-105 active:scale-95"
         >
           <ThumbsUp className="h-5 w-5" />
-          Yes!
+          Igen!
         </button>
         <button
           onClick={() => onAnswer(false)}
           className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary py-4 text-lg font-bold text-primary-foreground transition-transform hover:scale-105 active:scale-95"
         >
           <ThumbsDown className="h-5 w-5" />
-          Nope
+          Nem
         </button>
       </div>
     </div>

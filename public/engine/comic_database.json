@@ -1,0 +1,281 @@
+[
+    {
+        "id": 1,
+        "title": "Batman: Year One",
+        "publisher": "DC",
+        "year": 1987,
+        "pages": 144,
+        "price_huf": 5990,
+        "rating": 4.7,
+        "characters": [
+            "Batman",
+            "Bruce Wayne",
+            "Jim Gordon"
+        ]
+    },
+    {
+        "id": 2,
+        "title": "Batman: Hush",
+        "publisher": "DC",
+        "year": 2002,
+        "pages": 320,
+        "price_huf": 8990,
+        "rating": 4.6,
+        "characters": [
+            "Batman",
+            "Catwoman",
+            "Hush",
+            "Joker"
+        ]
+    },
+    {
+        "id": 3,
+        "title": "Batman: The Long Halloween",
+        "publisher": "DC",
+        "year": 1996,
+        "pages": 368,
+        "price_huf": 9990,
+        "rating": 4.8,
+        "characters": [
+            "Batman",
+            "Jim Gordon",
+            "Harvey Dent"
+        ]
+    },
+    {
+        "id": 4,
+        "title": "Superman: Red Son",
+        "publisher": "DC",
+        "year": 2003,
+        "pages": 192,
+        "price_huf": 6990,
+        "rating": 4.6,
+        "characters": [
+            "Superman",
+            "Clark Kent",
+            "Lex Luthor"
+        ]
+    },
+    {
+        "id": 5,
+        "title": "All-Star Superman",
+        "publisher": "DC",
+        "year": 2005,
+        "pages": 304,
+        "price_huf": 8490,
+        "rating": 4.7,
+        "characters": [
+            "Superman",
+            "Clark Kent",
+            "Lois Lane"
+        ]
+    },
+    {
+        "id": 6,
+        "title": "Watchmen",
+        "publisher": "DC",
+        "year": 1986,
+        "pages": 416,
+        "price_huf": 10990,
+        "rating": 4.9,
+        "characters": [
+            "Rorschach",
+            "Doctor Manhattan",
+            "Nite Owl"
+        ]
+    },
+    {
+        "id": 7,
+        "title": "Green Lantern: Secret Origin",
+        "publisher": "DC",
+        "year": 2008,
+        "pages": 192,
+        "price_huf": 6990,
+        "rating": 4.4,
+        "characters": [
+            "Green Lantern",
+            "Hal Jordan",
+            "Sinestro"
+        ]
+    },
+    {
+        "id": 8,
+        "title": "Flash: Born to Run",
+        "publisher": "DC",
+        "year": 1992,
+        "pages": 192,
+        "price_huf": 6990,
+        "rating": 4.3,
+        "characters": [
+            "Flash",
+            "Wally West",
+            "Jay Garrick"
+        ]
+    },
+    {
+        "id": 9,
+        "title": "Wonder Woman: The Hiketeia",
+        "publisher": "DC",
+        "year": 2002,
+        "pages": 112,
+        "price_huf": 4990,
+        "rating": 4.5,
+        "characters": [
+            "Wonder Woman",
+            "Diana Prince",
+            "Batman"
+        ]
+    },
+    {
+        "id": 10,
+        "title": "Justice League: Origin (New 52)",
+        "publisher": "DC",
+        "year": 2011,
+        "pages": 192,
+        "price_huf": 7490,
+        "rating": 4.2,
+        "characters": [
+            "Batman",
+            "Superman",
+            "Wonder Woman",
+            "Flash",
+            "Green Lantern"
+        ]
+    },
+    {
+        "id": 11,
+        "title": "Daredevil: Born Again",
+        "publisher": "Marvel",
+        "year": 1986,
+        "pages": 232,
+        "price_huf": 7990,
+        "rating": 4.8,
+        "characters": [
+            "Daredevil",
+            "Matt Murdock",
+            "Kingpin"
+        ]
+    },
+    {
+        "id": 12,
+        "title": "House of M",
+        "publisher": "Marvel",
+        "year": 2005,
+        "pages": 200,
+        "price_huf": 7490,
+        "rating": 4.6,
+        "characters": [
+            "Scarlet Witch",
+            "Magneto",
+            "Wolverine",
+            "Spider-Man"
+        ]
+    },
+    {
+        "id": 13,
+        "title": "Ultimate Spider-Man Vol. 1",
+        "publisher": "Marvel",
+        "year": 2000,
+        "pages": 304,
+        "price_huf": 8490,
+        "rating": 4.5,
+        "characters": [
+            "Spider-Man",
+            "Peter Parker",
+            "Green Goblin"
+        ]
+    },
+    {
+        "id": 14,
+        "title": "Ms. Marvel Vol. 1 (Kamala Khan)",
+        "publisher": "Marvel",
+        "year": 2014,
+        "pages": 120,
+        "price_huf": 4990,
+        "rating": 4.7,
+        "characters": [
+            "Ms. Marvel",
+            "Kamala Khan"
+        ]
+    },
+    {
+        "id": 15,
+        "title": "Wolverine: Weapon X",
+        "publisher": "Marvel",
+        "year": 1991,
+        "pages": 136,
+        "price_huf": 5990,
+        "rating": 4.6,
+        "characters": [
+            "Wolverine",
+            "Logan"
+        ]
+    },
+    {
+        "id": 16,
+        "title": "The Infinity Gauntlet",
+        "publisher": "Marvel",
+        "year": 1991,
+        "pages": 256,
+        "price_huf": 8990,
+        "rating": 4.8,
+        "characters": [
+            "Thanos",
+            "Captain America",
+            "Iron Man",
+            "Spider-Man"
+        ]
+    },
+    {
+        "id": 17,
+        "title": "Black Panther: A Nation Under Our Feet",
+        "publisher": "Marvel",
+        "year": 2016,
+        "pages": 144,
+        "price_huf": 5990,
+        "rating": 4.4,
+        "characters": [
+            "Black Panther",
+            "T'Challa"
+        ]
+    },
+    {
+        "id": 18,
+        "title": "Moon Knight: The Bottom",
+        "publisher": "Marvel",
+        "year": 2014,
+        "pages": 136,
+        "price_huf": 5990,
+        "rating": 4.3,
+        "characters": [
+            "Moon Knight",
+            "Marc Spector"
+        ]
+    },
+    {
+        "id": 19,
+        "title": "Doctor Strange: The Oath",
+        "publisher": "Marvel",
+        "year": 2006,
+        "pages": 112,
+        "price_huf": 4990,
+        "rating": 4.5,
+        "characters": [
+            "Doctor Strange",
+            "Wong"
+        ]
+    },
+    {
+        "id": 20,
+        "title": "Thor: God of Thunder – The God Butcher",
+        "publisher": "Marvel",
+        "year": 2012,
+        "pages": 136,
+        "price_huf": 5990,
+        "rating": 4.8,
+        "characters": [
+            "Thor",
+            "Gorr"
+        ]
+    }
+]

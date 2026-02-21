@@ -18,7 +18,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
         <Star className="mx-auto mb-3 h-12 w-12 text-accent" />
         <h1 className="mb-2 text-3xl font-bold md:text-4xl">{result.title}</h1>
         <p className="text-muted-foreground">
-          We found {result.recommendations.length} comics for you
+          {result.recommendations.length} kötetet válogattunk neked
         </p>
       </div>
 
@@ -45,21 +45,21 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
           onClick={() => setShowReasoning(!showReasoning)}
           className="flex w-full items-center justify-between rounded-lg bg-secondary px-5 py-3 font-semibold transition-colors hover:bg-muted"
         >
-          <span>Why these recommendations?</span>
+          <span>Miért ezeket ajánljuk?</span>
           {showReasoning ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
         </button>
 
         {showReasoning && (
           <div className="mt-3 rounded-lg border border-border bg-card p-5 animate-fade-in">
             <p className="mb-4 text-sm text-muted-foreground">{result.reasoning}</p>
-            <h4 className="mb-2 font-bold text-sm">Your Answers:</h4>
+            <h4 className="mb-2 font-bold text-sm">Válaszaid:</h4>
             <ul className="space-y-1 text-sm">
               {questions.map((q) => (
                 <li key={q.id} className="flex items-center gap-2">
                   <span>{q.icon}</span>
                   <span className="text-muted-foreground">{q.text}</span>
                   <span className="ml-auto font-bold">
-                    {answers[q.id] ? "✅ Yes" : "❌ No"}
+                    {answers[q.id] ? "✅ Igen" : "❌ Nem"}
                   </span>
                 </li>
               ))}
@@ -73,7 +73,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
           onClick={onRestart}
           className="comic-panel-sm px-8 py-3 font-bold transition-transform hover:scale-105 active:scale-95"
         >
-          🔄 Start Over
+          🔄 Újrakezdés
         </button>
       </div>
     </div>

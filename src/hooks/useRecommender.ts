@@ -40,17 +40,24 @@ export function useRecommender(): UseRecommenderReturn {
       setError(null);
 
       try {
-        // Fetch the Python script
-        const res = await fetch("/engine/recommender.py");
-        if (!res.ok) throw new Error("Failed to load recommender script");
-        const script = await res.text();
+        // Fetch the Python script and comic database in parallel
+        const [scriptRes, dataRes] = await Promise.all([
+          fetch("/engine/recommender.py"),
+          fetch("/engine/comic_database.json"),
+        ]);
+        if (!scriptRes.ok) throw new Error("Failed to load recommender script");
+        if (!dataRes.ok) throw new Error("Failed to load comic database");
+        const script = await scriptRes.text();
+        const comicsJson = await dataRes.text();
 
         // Load the script into Pyodide
         await runPython(script);
 
-        // Call the recommend function
+        // Call the recommend function with answers and comic data
         const answersJson = JSON.stringify(answers);
-        const resultJson = await runPython(`recommend('${answersJson.replace(/'/g, "\\'")}')`);
+        const safeAnswers = answersJson.replace(/'/g, "\\'");
+        const safeComics = comicsJson.replace(/'/g, "\\'").replace(/\n/g, "");
+        const resultJson = await runPython(`recommend('${safeAnswers}', '${safeComics}')`);
         const parsed: RecommendationResult = JSON.parse(resultJson);
         setResult(parsed);
       } catch (err: any) {
