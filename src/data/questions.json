@@ -1,8 +1,13 @@
 [
   {
     "id": "dc",
-    "text": "Inkább a DC univerzumot kedveled? (Nem = Marvel)",
+    "text": "Érdekelnek a DC képregények? (Batman, Superman, Wonder Woman…)",
     "icon": "🦇"
+  },
+  {
+    "id": "marvel",
+    "text": "Érdekelnek a Marvel képregények? (Spider-Man, X-Men, Avengers…)",
+    "icon": "🕷️"
   },
   {
     "id": "short",
