@@ -113,6 +113,7 @@ def recommend(answers_json: str, comics_json: str) -> str:
                 f"{c['price_huf']} Ft · ⭐ {c['rating']}"
             ),
             "why": neutral_summary_stub(c['title'], c['publisher'], c['year'], c['pages']),
+            "summary": c.get('summary', ''),
             "details": {
                 "price_per_page": ppp_str,
                 "roi": c.get('roi_proxy', 0),

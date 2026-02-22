@@ -7,11 +7,8 @@
         "pages": 144,
         "price_huf": 5990,
         "rating": 4.7,
-        "characters": [
-            "Batman",
-            "Bruce Wayne",
-            "Jim Gordon"
-        ]
+        "characters": ["Batman", "Bruce Wayne", "Jim Gordon"],
+        "summary": "Bruce Wayne visszatér Gothambe, hogy felvegye a harcot a bűnözéssel – miközben James Gordon hadnagy is megpróbálja megtisztítani a korrupt rendőrséget. Két párhuzamos eredetsztori, amely bemutatja, hogyan születik meg a Sötét Lovag és Gotham leghűségesebb rendőre."
     },
     {
         "id": 2,
@@ -21,12 +18,8 @@
         "pages": 320,
         "price_huf": 8990,
         "rating": 4.6,
-        "characters": [
-            "Batman",
-            "Catwoman",
-            "Hush",
-            "Joker"
-        ]
+        "characters": ["Batman", "Catwoman", "Hush", "Joker"],
+        "summary": "Egy titokzatos új ellenség jelenik meg Gothamben, aki Batman legközelebbi szövetségeseit és ellenségeit egyaránt manipulálja. A Sötét Lovagnak saját múltjával kell szembenéznie, miközben kideríti, ki áll a rejtelmes Hush mögött."
     },
     {
         "id": 3,
@@ -36,11 +29,8 @@
         "pages": 368,
         "price_huf": 9990,
         "rating": 4.8,
-        "characters": [
-            "Batman",
-            "Jim Gordon",
-            "Harvey Dent"
-        ]
+        "characters": ["Batman", "Jim Gordon", "Harvey Dent"],
+        "summary": "Batman, Gordon hadnagy és Harvey Dent ügyész szövetséget köt a gengsztervilág ellen, miközben egy rejtélyes sorozatgyilkos minden ünnepnapon lecsap. Sötét nyomozás, amely Gotham alvilágának átalakulását mutatja be."
     },
     {
         "id": 4,
@@ -50,11 +40,8 @@
         "pages": 192,
         "price_huf": 6990,
         "rating": 4.6,
-        "characters": [
-            "Superman",
-            "Clark Kent",
-            "Lex Luthor"
-        ]
+        "characters": ["Superman", "Clark Kent", "Lex Luthor"],
+        "summary": "Mi lett volna, ha Superman űrhajója nem Kansasben, hanem a Szovjetunióban száll le? Ebben az alternatív történetben a Acélember a szovjet rendszer védelmezője lesz, miközben Lex Luthor az amerikai oldalon próbálja megállítani."
     },
     {
         "id": 5,
@@ -64,11 +51,8 @@
         "pages": 304,
         "price_huf": 8490,
         "rating": 4.7,
-        "characters": [
-            "Superman",
-            "Clark Kent",
-            "Lois Lane"
-        ]
+        "characters": ["Superman", "Clark Kent", "Lois Lane"],
+        "summary": "Superman megtudja, hogy hamarosan meghal, és elhatározza, hogy hátralévő idejét a legnagyobb tettei végrehajtásával tölti. Egy optimista, grandiózus történet a hősiesség és az emberi lélek erejéről."
     },
     {
         "id": 6,
@@ -78,11 +62,8 @@
         "pages": 416,
         "price_huf": 10990,
         "rating": 4.9,
-        "characters": [
-            "Rorschach",
-            "Doctor Manhattan",
-            "Nite Owl"
-        ]
+        "characters": ["Rorschach", "Doctor Manhattan", "Nite Owl"],
+        "summary": "Egy alternatív 1985-ben, ahol a szuperhősök visszavonultak, egyikük rejtélyes halála nyomozásra készteti egykori társait. Filozófiai mélységű, felnőtt képregény a hatalom, a moralitás és az emberi természet kérdéseiről."
     },
     {
         "id": 7,
@@ -92,11 +73,8 @@
         "pages": 192,
         "price_huf": 6990,
         "rating": 4.4,
-        "characters": [
-            "Green Lantern",
-            "Hal Jordan",
-            "Sinestro"
-        ]
+        "characters": ["Green Lantern", "Hal Jordan", "Sinestro"],
+        "summary": "Hal Jordan, a vakmerő tesztpilóta megkapja egy haldokló űrlény erejegyűrűjét, és a Zöld Lámpások intergalaktikus rendfenntartó testületének tagja lesz. Egy eredetsztori, amely bemutatja a félelemnélküli hős első lépéseit."
     },
     {
         "id": 8,
@@ -106,11 +84,8 @@
         "pages": 192,
         "price_huf": 6990,
         "rating": 4.3,
-        "characters": [
-            "Flash",
-            "Wally West",
-            "Jay Garrick"
-        ]
+        "characters": ["Flash", "Wally West", "Jay Garrick"],
+        "summary": "Wally West, a fiatal srác, aki szupersebességre tesz szert, megismerkedik hősével, az eredeti Flashsel. Egy szívmelengető coming-of-age történet arról, hogyan lesz egy rajongó fiúból igazi szuperhős."
     },
     {
         "id": 9,
@@ -120,11 +95,8 @@
         "pages": 112,
         "price_huf": 4990,
         "rating": 4.5,
-        "characters": [
-            "Wonder Woman",
-            "Diana Prince",
-            "Batman"
-        ]
+        "characters": ["Wonder Woman", "Diana Prince", "Batman"],
+        "summary": "Egy fiatal lány Wonder Woman védelmét kéri egy ősi görög szertartás keretében, ám Batman is üldözi őt. Diana két kötelesség között őrlődik: az igazságszolgáltatás és az adott szó tisztelete között."
     },
     {
         "id": 10,
@@ -134,13 +106,8 @@
         "pages": 192,
         "price_huf": 7490,
         "rating": 4.2,
-        "characters": [
-            "Batman",
-            "Superman",
-            "Wonder Woman",
-            "Flash",
-            "Green Lantern"
-        ]
+        "characters": ["Batman", "Superman", "Wonder Woman", "Flash", "Green Lantern"],
+        "summary": "A Föld legnagyobb hősei először találkoznak, amikor egy hatalmas idegen invázió fenyegeti a bolygót. Akció-dús eredetsztori arról, hogyan alakul meg a Justice League."
     },
     {
         "id": 11,
@@ -150,11 +117,8 @@
         "pages": 232,
         "price_huf": 7990,
         "rating": 4.8,
-        "characters": [
-            "Daredevil",
-            "Matt Murdock",
-            "Kingpin"
-        ]
+        "characters": ["Daredevil", "Matt Murdock", "Kingpin"],
+        "summary": "Kingpin felfedezi Daredevil valódi személyazonosságát, és szisztematikusan lerombolja Matt Murdock életét. Egy sötét, megrázó történet a teljes összeomlásról és az újjászületés erejéről."
     },
     {
         "id": 12,
@@ -164,12 +128,8 @@
         "pages": 200,
         "price_huf": 7490,
         "rating": 4.6,
-        "characters": [
-            "Scarlet Witch",
-            "Magneto",
-            "Wolverine",
-            "Spider-Man"
-        ]
+        "characters": ["Scarlet Witch", "Magneto", "Wolverine", "Spider-Man"],
+        "summary": "Skarlát Boszorkány hatalmas erejével átírja a valóságot: egy olyan világot teremt, ahol a mutánsok uralkodnak. De mi történik, amikor a hősök rájönnek, hogy az életük hazugság?"
     },
     {
         "id": 13,
@@ -179,11 +139,8 @@
         "pages": 304,
         "price_huf": 8490,
         "rating": 4.5,
-        "characters": [
-            "Spider-Man",
-            "Peter Parker",
-            "Green Goblin"
-        ]
+        "characters": ["Spider-Man", "Peter Parker", "Green Goblin"],
+        "summary": "Peter Parker, egy átlagos középiskolás diák egy génmanipulált pók csípése után szupererőre tesz szert. Modern újragondolása a klasszikus Pókember-eredetsztorinak, tini drámával és szuperhős-kalandokkal."
     },
     {
         "id": 14,
@@ -193,10 +150,8 @@
         "pages": 120,
         "price_huf": 4990,
         "rating": 4.7,
-        "characters": [
-            "Ms. Marvel",
-            "Kamala Khan"
-        ]
+        "characters": ["Ms. Marvel", "Kamala Khan"],
+        "summary": "Kamala Khan, egy pakisztáni-amerikai tinédzser New Jersey-ből, váratlanul szupererőre tesz szert. Szívhez szóló történet az identitásról, a családról és arról, mit jelent hősnek lenni a modern világban."
     },
     {
         "id": 15,
@@ -206,10 +161,8 @@
         "pages": 136,
         "price_huf": 5990,
         "rating": 4.6,
-        "characters": [
-            "Wolverine",
-            "Logan"
-        ]
+        "characters": ["Wolverine", "Logan"],
+        "summary": "Logan múltjának legsötétebb fejezete: a titkos Weapon X program, amely adamantium csontvázzal és kitörölt emlékekkel formálta őt fegyverré. Brutális és drámai eredetsztori."
     },
     {
         "id": 16,
@@ -219,12 +172,8 @@
         "pages": 256,
         "price_huf": 8990,
         "rating": 4.8,
-        "characters": [
-            "Thanos",
-            "Captain America",
-            "Iron Man",
-            "Spider-Man"
-        ]
+        "characters": ["Thanos", "Captain America", "Iron Man", "Spider-Man"],
+        "summary": "Thanos megszerzi mind a hat Végtelen Követ, és isteni hatalomra tesz szert. A Marvel hőseinek össze kell fogniuk, hogy megállítsák az univerzum leghatalmasabb zsarnokát. Az MCU filmek ihletforrása."
     },
     {
         "id": 17,
@@ -234,10 +183,8 @@
         "pages": 144,
         "price_huf": 5990,
         "rating": 4.4,
-        "characters": [
-            "Black Panther",
-            "T'Challa"
-        ]
+        "characters": ["Black Panther", "T'Challa"],
+        "summary": "T'Challa, Wakanda királya belső lázadással néz szembe, miközben meg kell védenie országát a külső fenyegetésektől. Politikai thriller szuperhős-köntösben, amely a vezetés és a felelősség kérdéseit járja körül."
     },
     {
         "id": 18,
@@ -247,10 +194,8 @@
         "pages": 136,
         "price_huf": 5990,
         "rating": 4.3,
-        "characters": [
-            "Moon Knight",
-            "Marc Spector"
-        ]
+        "characters": ["Moon Knight", "Marc Spector"],
+        "summary": "Marc Spector, a több személyiséggel küzdő zsoldos, megpróbál visszatérni Moon Knight szerepébe. Pszichológiai thriller az identitás töredékeiről és az önmegváltás lehetőségéről."
     },
     {
         "id": 19,
@@ -260,10 +205,8 @@
         "pages": 112,
         "price_huf": 4990,
         "rating": 4.5,
-        "characters": [
-            "Doctor Strange",
-            "Wong"
-        ]
+        "characters": ["Doctor Strange", "Wong"],
+        "summary": "Doctor Strange egy mágikus gyógymóddal próbálja megmenteni hűséges barátja, Wong életét, ám egy titokzatos erő útját állja. Kalandos, humoros és szívhez szóló történet a mágia legfőbb mesteréről."
     },
     {
         "id": 20,
@@ -273,9 +216,7 @@
         "pages": 136,
         "price_huf": 5990,
         "rating": 4.8,
-        "characters": [
-            "Thor",
-            "Gorr"
-        ]
+        "characters": ["Thor", "Gorr"],
+        "summary": "Thor három különböző korszakban – fiatal viking istenként, jelenlegi Bosszúállóként és öreg királyként – néz szembe Gorr-ral, az Istenölővel. Epikus, időt átívelő kaland a hit és a hősiesség erejéről."
     }
 ]
