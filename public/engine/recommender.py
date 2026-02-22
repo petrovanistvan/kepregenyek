@@ -67,8 +67,13 @@ def recommend(answers_json: str, comics_json: str) -> str:
         filtered = filter_by_publisher(comics, "Marvel")
         universe = "Marvel"
     else:
-        filtered = comics[:]
-        universe = "DC & Marvel"
+        # Neither selected – return a friendly message
+        result = {
+            "title": "Nem választottál univerzumot",
+            "recommendations": [],
+            "reasoning": "Sem a DC, sem a Marvel univerzumot nem választottad. Próbáld újra, és jelölj meg legalább egyet!"
+        }
+        return json.dumps(result, ensure_ascii=False)
 
     # Step 2: Apply preference filters
     if answers.get("short"):
