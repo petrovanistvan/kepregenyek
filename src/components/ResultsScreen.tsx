@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ChevronDown, ChevronUp, BookOpen, Star, X } from "lucide-react";
+import { useState, useRef } from "react";
+import { ChevronDown, ChevronUp, BookOpen, Star, X, Volume2, Square, Loader2 } from "lucide-react";
 import type { RecommendationResult } from "@/hooks/useRecommender";
 
 interface ResultsScreenProps {
@@ -12,8 +12,63 @@ interface ResultsScreenProps {
 const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenProps) => {
   const [showReasoning, setShowReasoning] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [ttsLoading, setTtsLoading] = useState(false);
+  const [ttsPlaying, setTtsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const selectedRec = selectedIndex !== null ? result.recommendations[selectedIndex] : null;
+
+  const handleTts = async (text: string) => {
+    // If already playing, stop
+    if (ttsPlaying && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+      setTtsPlaying(false);
+      return;
+    }
+
+    setTtsLoading(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ text }),
+        }
+      );
+
+      if (!response.ok) throw new Error("TTS hiba");
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+      audio.onended = () => {
+        setTtsPlaying(false);
+        audioRef.current = null;
+      };
+      setTtsPlaying(true);
+      await audio.play();
+    } catch (err) {
+      console.error("TTS error:", err);
+    } finally {
+      setTtsLoading(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+      setTtsPlaying(false);
+    }
+    setSelectedIndex(null);
+  };
 
   return (
     <div className="mx-auto max-w-2xl animate-slide-in">
@@ -51,14 +106,14 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
       {selectedRec && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in"
-          onClick={() => setSelectedIndex(null)}
+          onClick={handleCloseModal}
         >
           <div
             className="relative w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-xl animate-slide-in"
             onClick={(e) => e.stopPropagation()}
           >
             <button
-              onClick={() => setSelectedIndex(null)}
+              onClick={handleCloseModal}
               className="absolute right-4 top-4 rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <X className="h-5 w-5" />
@@ -67,9 +122,25 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
             <h2 className="mb-1 text-2xl font-bold">{selectedRec.title}</h2>
             <p className="mb-4 text-sm text-muted-foreground">{selectedRec.description}</p>
             <div className="rounded-lg bg-secondary p-4">
-              <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Spoilermentes ismertető
-              </h3>
+              <div className="mb-2 flex items-center justify-between">
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  Spoilermentes ismertető
+                </h3>
+                <button
+                  onClick={() => handleTts(selectedRec.summary)}
+                  disabled={ttsLoading}
+                  className="flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
+                >
+                  {ttsLoading ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : ttsPlaying ? (
+                    <Square className="h-3.5 w-3.5" />
+                  ) : (
+                    <Volume2 className="h-3.5 w-3.5" />
+                  )}
+                  {ttsLoading ? "Betöltés…" : ttsPlaying ? "Leállítás" : "Felolvasás"}
+                </button>
+              </div>
               <p className="text-sm leading-relaxed">{selectedRec.summary}</p>
             </div>
             {selectedRec.details && (
