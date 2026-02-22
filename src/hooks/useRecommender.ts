@@ -5,6 +5,12 @@ export interface Recommendation {
   title: string;
   description: string;
   why: string;
+  summary: string;
+  details?: {
+    price_per_page?: string;
+    roi?: number;
+    characters?: string;
+  };
 }
 
 export interface RecommendationResult {

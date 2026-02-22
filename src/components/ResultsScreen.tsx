@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, BookOpen, Star } from "lucide-react";
+import { ChevronDown, ChevronUp, BookOpen, Star, X } from "lucide-react";
 import type { RecommendationResult } from "@/hooks/useRecommender";
 
 interface ResultsScreenProps {
@@ -11,6 +11,9 @@ interface ResultsScreenProps {
 
 const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenProps) => {
   const [showReasoning, setShowReasoning] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
+  const selectedRec = selectedIndex !== null ? result.recommendations[selectedIndex] : null;
 
   return (
     <div className="mx-auto max-w-2xl animate-slide-in">
@@ -24,7 +27,12 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
 
       <div className="space-y-4">
         {result.recommendations.map((rec, i) => (
-          <div key={i} className="comic-panel-sm p-5 animate-slide-in" style={{ animationDelay: `${i * 80}ms` }}>
+          <button
+            key={i}
+            onClick={() => setSelectedIndex(i)}
+            className="comic-panel-sm w-full p-5 text-left animate-slide-in transition-transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            style={{ animationDelay: `${i * 80}ms` }}
+          >
             <div className="flex items-start gap-3">
               <BookOpen className="mt-1 h-5 w-5 shrink-0 text-accent" />
               <div>
@@ -35,9 +43,52 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
                 </p>
               </div>
             </div>
-          </div>
+          </button>
         ))}
       </div>
+
+      {/* Detail overlay */}
+      {selectedRec && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in"
+          onClick={() => setSelectedIndex(null)}
+        >
+          <div
+            className="relative w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-xl animate-slide-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setSelectedIndex(null)}
+              className="absolute right-4 top-4 rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <BookOpen className="mb-3 h-8 w-8 text-accent" />
+            <h2 className="mb-1 text-2xl font-bold">{selectedRec.title}</h2>
+            <p className="mb-4 text-sm text-muted-foreground">{selectedRec.description}</p>
+            <div className="rounded-lg bg-secondary p-4">
+              <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                Spoilermentes ismertető
+              </h3>
+              <p className="text-sm leading-relaxed">{selectedRec.summary}</p>
+            </div>
+            {selectedRec.details && (
+              <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                {selectedRec.details.characters && (
+                  <span className="rounded-full bg-muted px-3 py-1">
+                    🦸 {selectedRec.details.characters}
+                  </span>
+                )}
+                {selectedRec.details.price_per_page && (
+                  <span className="rounded-full bg-muted px-3 py-1">
+                    💰 {selectedRec.details.price_per_page}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Why these? */}
       <div className="mt-8">
