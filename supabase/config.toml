@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.generate-comic-image]
 verify_jwt = false
+
+[functions.generate-comic-summary]
+verify_jwt = false

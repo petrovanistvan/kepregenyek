@@ -16,32 +16,58 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
   const [ttsPlaying, setTtsPlaying] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<Record<number, string>>({});
   const [imageLoading, setImageLoading] = useState<Record<number, boolean>>({});
+  const [generatedSummaries, setGeneratedSummaries] = useState<Record<number, string>>({});
+  const [summaryLoading, setSummaryLoading] = useState<Record<number, boolean>>({});
 
   const selectedRec = selectedIndex !== null ? result.recommendations[selectedIndex] : null;
 
-  // Generate image when a card is opened
+  // Generate image AND summary in parallel when a card is opened
   useEffect(() => {
     if (selectedIndex === null) return;
-    if (generatedImages[selectedIndex] || imageLoading[selectedIndex]) return;
-
     const rec = result.recommendations[selectedIndex];
-    setImageLoading((prev) => ({ ...prev, [selectedIndex]: true }));
-
     const idx = selectedIndex;
-    supabase.functions
-      .invoke("generate-comic-image", {
-        body: { title: rec.title, summary: rec.summary },
-      })
-      .then(({ data, error }) => {
-        if (!error && data?.imageUrl) {
-          setGeneratedImages((prev) => ({ ...prev, [idx]: data.imageUrl }));
-        }
-      })
-      .catch(() => {})
-      .finally(() => {
-        setImageLoading((prev) => ({ ...prev, [idx]: false }));
-      });
+
+    // Generate image
+    if (!generatedImages[idx] && !imageLoading[idx]) {
+      setImageLoading((prev) => ({ ...prev, [idx]: true }));
+      supabase.functions
+        .invoke("generate-comic-image", {
+          body: { title: rec.title, summary: rec.description },
+        })
+        .then(({ data }) => {
+          if (data?.imageUrl) {
+            setGeneratedImages((prev) => ({ ...prev, [idx]: data.imageUrl }));
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          setImageLoading((prev) => ({ ...prev, [idx]: false }));
+        });
+    }
+
+    // Generate summary
+    if (!generatedSummaries[idx] && !summaryLoading[idx]) {
+      setSummaryLoading((prev) => ({ ...prev, [idx]: true }));
+      supabase.functions
+        .invoke("generate-comic-summary", {
+          body: { title: rec.title, description: rec.description, why: rec.why },
+        })
+        .then(({ data }) => {
+          if (data?.summary) {
+            setGeneratedSummaries((prev) => ({ ...prev, [idx]: data.summary }));
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          setSummaryLoading((prev) => ({ ...prev, [idx]: false }));
+        });
+    }
   }, [selectedIndex]);
+
+  const currentSummary =
+    selectedIndex !== null
+      ? generatedSummaries[selectedIndex] || selectedRec?.summary || ""
+      : "";
 
   const handleTts = (text: string) => {
     if (ttsPlaying) {
@@ -144,8 +170,9 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
                   Spoilermentes ismertető
                 </h3>
                 <button
-                  onClick={() => handleTts(selectedRec.summary)}
-                  className="flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground transition-transform hover:scale-105 active:scale-95"
+                  onClick={() => handleTts(currentSummary)}
+                  disabled={summaryLoading[selectedIndex]}
+                  className="flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
                 >
                   {ttsPlaying ? (
                     <Square className="h-3.5 w-3.5" />
@@ -155,7 +182,14 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
                   {ttsPlaying ? "Leállítás" : "Felolvasás"}
                 </button>
               </div>
-              <p className="text-sm leading-relaxed">{selectedRec.summary}</p>
+              {summaryLoading[selectedIndex] ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Ismertető generálása…</span>
+                </div>
+              ) : (
+                <p className="text-sm leading-relaxed">{currentSummary}</p>
+              )}
             </div>
             {selectedRec.details && (
               <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
