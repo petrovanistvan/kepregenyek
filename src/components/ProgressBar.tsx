@@ -9,9 +9,7 @@ const ProgressBar = ({ current, total }: ProgressBarProps) => {
   return (
     <div className="w-full">
       <div className="mb-2 flex items-center justify-between text-sm font-medium text-muted-foreground">
-        <span>
-          {current + 1}. kérdés / {total}
-        </span>
+        <span>{current + 1}. kérdés</span>
         <span>{Math.round(percent)}%</span>
       </div>
       <div className="h-3 w-full overflow-hidden rounded-full bg-secondary">
