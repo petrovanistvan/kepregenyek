@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { ChevronDown, ChevronUp, BookOpen, Star, X, Volume2, Square } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronDown, ChevronUp, BookOpen, Star, X, Volume2, Square, Loader2, ImageIcon } from "lucide-react";
 import type { RecommendationResult } from "@/hooks/useRecommender";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ResultsScreenProps {
   result: RecommendationResult;
@@ -13,11 +14,36 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
   const [showReasoning, setShowReasoning] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [ttsPlaying, setTtsPlaying] = useState(false);
+  const [generatedImages, setGeneratedImages] = useState<Record<number, string>>({});
+  const [imageLoading, setImageLoading] = useState<Record<number, boolean>>({});
 
   const selectedRec = selectedIndex !== null ? result.recommendations[selectedIndex] : null;
 
+  // Generate image when a card is opened
+  useEffect(() => {
+    if (selectedIndex === null) return;
+    if (generatedImages[selectedIndex] || imageLoading[selectedIndex]) return;
+
+    const rec = result.recommendations[selectedIndex];
+    setImageLoading((prev) => ({ ...prev, [selectedIndex]: true }));
+
+    const idx = selectedIndex;
+    supabase.functions
+      .invoke("generate-comic-image", {
+        body: { title: rec.title, summary: rec.summary },
+      })
+      .then(({ data, error }) => {
+        if (!error && data?.imageUrl) {
+          setGeneratedImages((prev) => ({ ...prev, [idx]: data.imageUrl }));
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        setImageLoading((prev) => ({ ...prev, [idx]: false }));
+      });
+  }, [selectedIndex]);
+
   const handleTts = (text: string) => {
-    // If already playing, stop
     if (ttsPlaying) {
       window.speechSynthesis.cancel();
       setTtsPlaying(false);
@@ -72,21 +98,43 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
       </div>
 
       {/* Detail overlay */}
-      {selectedRec && (
+      {selectedRec && selectedIndex !== null && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in"
           onClick={handleCloseModal}
         >
           <div
-            className="relative w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-xl animate-slide-in"
+            className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-xl animate-slide-in"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={handleCloseModal}
-              className="absolute right-4 top-4 rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="absolute right-4 top-4 z-10 rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <X className="h-5 w-5" />
             </button>
+
+            {/* Generated image */}
+            <div className="mb-4 overflow-hidden rounded-xl bg-muted aspect-[16/9] flex items-center justify-center">
+              {imageLoading[selectedIndex] ? (
+                <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                  <span className="text-xs">Kép generálása…</span>
+                </div>
+              ) : generatedImages[selectedIndex] ? (
+                <img
+                  src={generatedImages[selectedIndex]}
+                  alt={`${selectedRec.title} illusztráció`}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                  <ImageIcon className="h-8 w-8" />
+                  <span className="text-xs">Kép nem elérhető</span>
+                </div>
+              )}
+            </div>
+
             <BookOpen className="mb-3 h-8 w-8 text-accent" />
             <h2 className="mb-1 text-2xl font-bold">{selectedRec.title}</h2>
             <p className="mb-4 text-sm text-muted-foreground">{selectedRec.description}</p>

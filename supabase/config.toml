@@ -1,1 +1,7 @@
 project_id = "vzpfujgsmnylldynbena"
+
+[functions.elevenlabs-tts]
+verify_jwt = false
+
+[functions.generate-comic-image]
+verify_jwt = false
