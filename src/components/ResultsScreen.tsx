@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { ChevronDown, ChevronUp, BookOpen, Star, X, Volume2, Square, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, ChevronUp, BookOpen, Star, X, Volume2, Square } from "lucide-react";
 import type { RecommendationResult } from "@/hooks/useRecommender";
 
 interface ResultsScreenProps {
@@ -12,61 +12,30 @@ interface ResultsScreenProps {
 const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenProps) => {
   const [showReasoning, setShowReasoning] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const [ttsLoading, setTtsLoading] = useState(false);
   const [ttsPlaying, setTtsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const selectedRec = selectedIndex !== null ? result.recommendations[selectedIndex] : null;
 
-  const handleTts = async (text: string) => {
+  const handleTts = (text: string) => {
     // If already playing, stop
-    if (ttsPlaying && audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
+    if (ttsPlaying) {
+      window.speechSynthesis.cancel();
       setTtsPlaying(false);
       return;
     }
 
-    setTtsLoading(true);
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ text }),
-        }
-      );
-
-      if (!response.ok) throw new Error("TTS hiba");
-
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
-      audioRef.current = audio;
-      audio.onended = () => {
-        setTtsPlaying(false);
-        audioRef.current = null;
-      };
-      setTtsPlaying(true);
-      await audio.play();
-    } catch (err) {
-      console.error("TTS error:", err);
-    } finally {
-      setTtsLoading(false);
-    }
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "hu-HU";
+    utterance.rate = 1;
+    utterance.onend = () => setTtsPlaying(false);
+    utterance.onerror = () => setTtsPlaying(false);
+    setTtsPlaying(true);
+    window.speechSynthesis.speak(utterance);
   };
 
   const handleCloseModal = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-      setTtsPlaying(false);
-    }
+    window.speechSynthesis.cancel();
+    setTtsPlaying(false);
     setSelectedIndex(null);
   };
 
@@ -128,17 +97,14 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
                 </h3>
                 <button
                   onClick={() => handleTts(selectedRec.summary)}
-                  disabled={ttsLoading}
-                  className="flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground transition-transform hover:scale-105 active:scale-95"
                 >
-                  {ttsLoading ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  ) : ttsPlaying ? (
+                  {ttsPlaying ? (
                     <Square className="h-3.5 w-3.5" />
                   ) : (
                     <Volume2 className="h-3.5 w-3.5" />
                   )}
-                  {ttsLoading ? "Betöltés…" : ttsPlaying ? "Leállítás" : "Felolvasás"}
+                  {ttsPlaying ? "Leállítás" : "Felolvasás"}
                 </button>
               </div>
               <p className="text-sm leading-relaxed">{selectedRec.summary}</p>
