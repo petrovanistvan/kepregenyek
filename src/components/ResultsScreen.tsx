@@ -32,7 +32,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
       setImageLoading((prev) => ({ ...prev, [idx]: true }));
       supabase.functions
         .invoke("generate-comic-image", {
-          body: { title: rec.title, summary: rec.description },
+          body: { title: rec.title, summary: rec.summary || rec.description },
         })
         .then(({ data }) => {
           if (data?.imageUrl) {
