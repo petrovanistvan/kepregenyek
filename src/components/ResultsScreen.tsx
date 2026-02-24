@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronDown, ChevronUp, BookOpen, Star, X, Volume2, Square, Loader2, ImageIcon } from "lucide-react";
+import { ChevronDown, ChevronUp, BookOpen, Star, X, Volume2, Square, Loader2, ImageIcon, RefreshCw } from "lucide-react";
 import type { RecommendationResult } from "@/hooks/useRecommender";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -91,6 +91,42 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
     setSelectedIndex(null);
   };
 
+  const handleRegenerate = () => {
+    if (selectedIndex === null) return;
+    const idx = selectedIndex;
+    const rec = result.recommendations[idx];
+
+    // Clear cached results
+    setGeneratedImages((prev) => { const n = { ...prev }; delete n[idx]; return n; });
+    setGeneratedSummaries((prev) => { const n = { ...prev }; delete n[idx]; return n; });
+    window.speechSynthesis.cancel();
+    setTtsPlaying(false);
+
+    // Trigger regeneration
+    setImageLoading((prev) => ({ ...prev, [idx]: true }));
+    setSummaryLoading((prev) => ({ ...prev, [idx]: true }));
+
+    supabase.functions
+      .invoke("generate-comic-image", {
+        body: { title: rec.title, summary: rec.summary || rec.description },
+      })
+      .then(({ data }) => {
+        if (data?.imageUrl) setGeneratedImages((prev) => ({ ...prev, [idx]: data.imageUrl }));
+      })
+      .catch(() => {})
+      .finally(() => setImageLoading((prev) => ({ ...prev, [idx]: false })));
+
+    supabase.functions
+      .invoke("generate-comic-summary", {
+        body: { title: rec.title, description: rec.description, why: rec.why },
+      })
+      .then(({ data }) => {
+        if (data?.summary) setGeneratedSummaries((prev) => ({ ...prev, [idx]: data.summary }));
+      })
+      .catch(() => {})
+      .finally(() => setSummaryLoading((prev) => ({ ...prev, [idx]: false })));
+  };
+
   return (
     <div className="mx-auto max-w-2xl animate-slide-in">
       <div className="mb-8 text-center">
@@ -133,12 +169,14 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
             className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-xl animate-slide-in"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              onClick={handleCloseModal}
-              className="absolute right-4 top-4 z-10 rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            <div className="flex items-center justify-end mb-2">
+              <button
+                onClick={handleCloseModal}
+                className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
 
             {/* Generated image */}
             <div className="mb-4 overflow-hidden rounded-xl bg-muted aspect-[16/9] flex items-center justify-center">
@@ -205,6 +243,16 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
                 )}
               </div>
             )}
+            <div className="mt-4 flex justify-center">
+              <button
+                onClick={handleRegenerate}
+                disabled={imageLoading[selectedIndex] || summaryLoading[selectedIndex]}
+                className="flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
+              >
+                <RefreshCw className={`h-4 w-4 ${imageLoading[selectedIndex] || summaryLoading[selectedIndex] ? "animate-spin" : ""}`} />
+                Újragenerálás
+              </button>
+            </div>
           </div>
         </div>
       )}
