@@ -179,7 +179,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
             </div>
 
             {/* Generated image */}
-            <div className="mb-4 overflow-hidden rounded-xl bg-muted aspect-[16/9] flex items-center justify-center">
+            <div className="mb-4 overflow-hidden rounded-xl bg-muted aspect-[16/9] max-h-[30vh] flex items-center justify-center">
               {imageLoading[selectedIndex] ? (
                 <div className="flex flex-col items-center gap-2 text-muted-foreground">
                   <Loader2 className="h-8 w-8 animate-spin" />
