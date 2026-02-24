@@ -19,7 +19,7 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const prompt = `Create a dramatic, atmospheric comic book style illustration that captures the mood and essence of this comic: "${title}". Description: ${summary}. Style: bold colors, dramatic lighting, cinematic composition, comic book art style. Do NOT include any text or speech bubbles.`;
+    const prompt = `Create a dramatic, atmospheric comic book style illustration inspired by this story concept: ${summary}. Style: bold colors, dramatic lighting, cinematic composition, comic book art style. Do NOT include any text, speech bubbles, logos, or trademarked character names. Create an original artistic interpretation of the mood and themes.`;
 
     const response = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
