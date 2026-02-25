@@ -76,12 +76,13 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
   useEffect(() => {
     if (selectedIndex === null) return;
     const rec = result.recommendations[selectedIndex];
+    // Generate both image and summary in parallel; don't show stale static text
     void generateAssets(selectedIndex, rec, { silent: true });
   }, [selectedIndex]);
 
   const currentSummary =
     selectedIndex !== null
-      ? generatedSummaries[selectedIndex] || selectedRec?.summary || ""
+      ? generatedSummaries[selectedIndex] || ""
       : "";
 
   const handleTts = (text: string) => {
