@@ -19,45 +19,64 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const prompt = `Create a dramatic, atmospheric comic book style illustration inspired by this story concept: ${summary}. Style: bold colors, dramatic lighting, cinematic composition, comic book art style. Do NOT include any text, speech bubbles, logos, or trademarked character names. Create an original artistic interpretation of the mood and themes.`;
+    const prompt = `Create a premium, detailed comic-book illustration for this EXACT comic: "${title}".
+Story context: ${summary}
 
-    const response = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash-image",
-          messages: [{ role: "user", content: prompt }],
-          modalities: ["image", "text"],
-        }),
-      }
-    );
+Critical requirements:
+- The visual must match the title and story context above.
+- If the title references a specific superhero/team, depict that exact hero/team with recognizable costume colors and silhouette.
+- Composition must be horizontal 4:3, full-bleed, edge-to-edge artwork that fills the entire frame.
+- No text, speech bubbles, captions, logos, watermarks, or borders.
+- Cinematic lighting, dynamic action, high detail, modern comic art style.`;
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded, please try again later." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+    const fallbackPrompt = `Comic illustration for "${title}". Match the title faithfully, use horizontal 4:3 full-frame composition, and avoid all text/logos/watermarks.`;
+
+    let imageUrl: string | null = null;
+
+    for (const activePrompt of [prompt, fallbackPrompt]) {
+      const response = await fetch(
+        "https://ai.gateway.lovable.dev/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-3-pro-image-preview",
+            messages: [{ role: "user", content: activePrompt }],
+            modalities: ["image", "text"],
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          return new Response(
+            JSON.stringify({ error: "Rate limit exceeded, please try again later." }),
+            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        if (response.status === 402) {
+          return new Response(
+            JSON.stringify({ error: "Payment required." }),
+            { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        const t = await response.text();
+        console.error("AI gateway error:", response.status, t);
+        throw new Error(`AI gateway error: ${response.status}`);
       }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Payment required." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      throw new Error(`AI gateway error: ${response.status}`);
+
+      const data = await response.json();
+      imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url ?? null;
+
+      if (imageUrl) break;
     }
 
-    const data = await response.json();
-    const imageUrl =
-      data.choices?.[0]?.message?.images?.[0]?.image_url?.url ?? null;
+    if (!imageUrl) {
+      throw new Error("No image returned from AI model");
+    }
 
     return new Response(
       JSON.stringify({ imageUrl }),
