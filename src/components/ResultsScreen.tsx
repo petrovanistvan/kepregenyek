@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ChevronDown, ChevronUp, BookOpen, Star, X, Volume2, Square, Loader2, ImageIcon, RefreshCw } from "lucide-react";
 import type { RecommendationResult } from "@/hooks/useRecommender";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface ResultsScreenProps {
   result: RecommendationResult;
@@ -19,49 +20,63 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
   const [generatedSummaries, setGeneratedSummaries] = useState<Record<number, string>>({});
   const [summaryLoading, setSummaryLoading] = useState<Record<number, boolean>>({});
 
+  const { toast } = useToast();
   const selectedRec = selectedIndex !== null ? result.recommendations[selectedIndex] : null;
 
-  // Generate image AND summary in parallel when a card is opened
+  const generateAssets = async (
+    idx: number,
+    rec: RecommendationResult["recommendations"][number],
+    options?: { force?: boolean; silent?: boolean }
+  ) => {
+    const force = options?.force ?? false;
+    const silent = options?.silent ?? false;
+
+    if ((force || !generatedImages[idx]) && !imageLoading[idx]) {
+      setImageLoading((prev) => ({ ...prev, [idx]: true }));
+      let imageUrl: string | null = null;
+
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const { data, error } = await supabase.functions.invoke("generate-comic-image", {
+          body: { title: rec.title, summary: rec.summary || rec.description },
+        });
+
+        if (!error && data?.imageUrl) {
+          imageUrl = data.imageUrl;
+          break;
+        }
+      }
+
+      if (imageUrl) {
+        setGeneratedImages((prev) => ({ ...prev, [idx]: imageUrl as string }));
+      } else if (!silent) {
+        toast({
+          title: "Nem sikerült képet generálni",
+          description: "Próbáld újra az Újragenerálás gombbal.",
+          variant: "destructive",
+        });
+      }
+
+      setImageLoading((prev) => ({ ...prev, [idx]: false }));
+    }
+
+    if ((force || !generatedSummaries[idx]) && !summaryLoading[idx]) {
+      setSummaryLoading((prev) => ({ ...prev, [idx]: true }));
+      const { data, error } = await supabase.functions.invoke("generate-comic-summary", {
+        body: { title: rec.title, description: rec.description, why: rec.why },
+      });
+
+      if (!error && data?.summary) {
+        setGeneratedSummaries((prev) => ({ ...prev, [idx]: data.summary }));
+      }
+
+      setSummaryLoading((prev) => ({ ...prev, [idx]: false }));
+    }
+  };
+
   useEffect(() => {
     if (selectedIndex === null) return;
     const rec = result.recommendations[selectedIndex];
-    const idx = selectedIndex;
-
-    // Generate image
-    if (!generatedImages[idx] && !imageLoading[idx]) {
-      setImageLoading((prev) => ({ ...prev, [idx]: true }));
-      supabase.functions
-        .invoke("generate-comic-image", {
-          body: { title: rec.title, summary: rec.summary || rec.description },
-        })
-        .then(({ data }) => {
-          if (data?.imageUrl) {
-            setGeneratedImages((prev) => ({ ...prev, [idx]: data.imageUrl }));
-          }
-        })
-        .catch(() => {})
-        .finally(() => {
-          setImageLoading((prev) => ({ ...prev, [idx]: false }));
-        });
-    }
-
-    // Generate summary
-    if (!generatedSummaries[idx] && !summaryLoading[idx]) {
-      setSummaryLoading((prev) => ({ ...prev, [idx]: true }));
-      supabase.functions
-        .invoke("generate-comic-summary", {
-          body: { title: rec.title, description: rec.description, why: rec.why },
-        })
-        .then(({ data }) => {
-          if (data?.summary) {
-            setGeneratedSummaries((prev) => ({ ...prev, [idx]: data.summary }));
-          }
-        })
-        .catch(() => {})
-        .finally(() => {
-          setSummaryLoading((prev) => ({ ...prev, [idx]: false }));
-        });
-    }
+    void generateAssets(selectedIndex, rec, { silent: true });
   }, [selectedIndex]);
 
   const currentSummary =
@@ -96,35 +111,21 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
     const idx = selectedIndex;
     const rec = result.recommendations[idx];
 
-    // Clear cached results
-    setGeneratedImages((prev) => { const n = { ...prev }; delete n[idx]; return n; });
-    setGeneratedSummaries((prev) => { const n = { ...prev }; delete n[idx]; return n; });
+    setGeneratedImages((prev) => {
+      const n = { ...prev };
+      delete n[idx];
+      return n;
+    });
+    setGeneratedSummaries((prev) => {
+      const n = { ...prev };
+      delete n[idx];
+      return n;
+    });
+
     window.speechSynthesis.cancel();
     setTtsPlaying(false);
 
-    // Trigger regeneration
-    setImageLoading((prev) => ({ ...prev, [idx]: true }));
-    setSummaryLoading((prev) => ({ ...prev, [idx]: true }));
-
-    supabase.functions
-      .invoke("generate-comic-image", {
-        body: { title: rec.title, summary: rec.summary || rec.description },
-      })
-      .then(({ data }) => {
-        if (data?.imageUrl) setGeneratedImages((prev) => ({ ...prev, [idx]: data.imageUrl }));
-      })
-      .catch(() => {})
-      .finally(() => setImageLoading((prev) => ({ ...prev, [idx]: false })));
-
-    supabase.functions
-      .invoke("generate-comic-summary", {
-        body: { title: rec.title, description: rec.description, why: rec.why },
-      })
-      .then(({ data }) => {
-        if (data?.summary) setGeneratedSummaries((prev) => ({ ...prev, [idx]: data.summary }));
-      })
-      .catch(() => {})
-      .finally(() => setSummaryLoading((prev) => ({ ...prev, [idx]: false })));
+    void generateAssets(idx, rec, { force: true });
   };
 
   return (
@@ -179,7 +180,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
             </div>
 
             {/* Generated image */}
-            <div className="mb-4 h-[min(38vh,320px)] w-full overflow-hidden rounded-xl bg-muted flex items-center justify-center">
+            <div className="mb-4 aspect-[4/3] w-full overflow-hidden rounded-xl bg-muted flex items-center justify-center">
               {imageLoading[selectedIndex] ? (
                 <div className="flex flex-col items-center gap-2 text-muted-foreground">
                   <Loader2 className="h-8 w-8 animate-spin" />
@@ -189,7 +190,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
                 <img
                   src={generatedImages[selectedIndex]}
                   alt={`${selectedRec.title} illusztráció`}
-                  className="h-full w-full object-contain"
+                  className="h-full w-full object-cover"
                 />
               ) : (
                 <div className="flex flex-col items-center gap-2 text-muted-foreground">
