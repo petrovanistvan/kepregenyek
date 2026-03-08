@@ -336,7 +336,7 @@ supabase/functions/
             <li><strong>Képgenerálás multi-model fallback:</strong> Két különböző Gemini modellt próbál, majd graceful null-t ad vissza</li>
             <li><strong>Rate limiting:</strong> 429-es válasz esetén felhasználó-barát hibaüzenet</li>
             <li><strong>Edge Function retry:</strong> A képgenerálás max 2 próbálkozást tesz a frontend oldalon</li>
-            <li><strong>TTS fallback:</strong> Web Speech API-t használ (böngésző natív), nem függ külső szolgáltatástól</li>
+            <li><strong>TTS:</strong> Web Speech API-t használ (böngésző natív), nem függ külső szolgáltatástól</li>
           </ul>
         </section>
 
