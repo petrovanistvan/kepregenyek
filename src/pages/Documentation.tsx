@@ -97,7 +97,6 @@ const Documentation = () => {
 │  │  • generate-comic-image      (AI képgenerálás)    │       │
 │  │  • generate-comic-summary    (AI ismertető)       │       │
 │  │  • generate-more-like-this   (hasonló ajánlások)  │       │
-│  │  • elevenlabs-tts            (szövegfelolvasás)   │       │
 │  └──────────────────────────────────────────────────┘       │
 └──────────────────────────────────────────────────────────────┘`}
           </pre>
@@ -139,8 +138,7 @@ supabase/functions/
 ├── generate-recommendations/  # AI ajánlás edge function
 ├── generate-comic-image/      # Képgenerálás edge function
 ├── generate-comic-summary/    # Ismertető generálás
-├── generate-more-like-this/   # Hasonló ajánlások
-└── elevenlabs-tts/            # Szövegfelolvasás (ElevenLabs)`}
+└── generate-more-like-this/   # Hasonló ajánlások`}
           </pre>
         </section>
 
@@ -232,16 +230,6 @@ supabase/functions/
               </ul>
             </div>
 
-            <div className="rounded-lg border border-border p-4">
-              <h3 className="mb-2 text-lg font-semibold text-foreground">7.5 elevenlabs-tts</h3>
-              <p className="mb-2 text-sm text-foreground/90">Szöveg-hang konverzió az ElevenLabs API-n keresztül (többnyelvű v2 modell).</p>
-              <ul className="list-disc pl-6 text-sm text-foreground/80 space-y-1">
-                <li><strong>Input:</strong> <code className="rounded bg-muted px-1 text-xs">{`{ text, voiceId? }`}</code></li>
-                <li><strong>Output:</strong> audio/mpeg bináris</li>
-                <li><strong>Szükséges secret:</strong> ELEVENLABS_API_KEY</li>
-                <li><strong>Megjegyzés:</strong> Jelenleg a frontend a Web Speech API-t használja, ez a function tartalék</li>
-              </ul>
-            </div>
           </div>
         </section>
 
@@ -334,7 +322,7 @@ supabase/functions/
                 <tr className="border-b border-border/50"><td className="py-2 pr-4 font-mono text-xs">VITE_SUPABASE_URL</td><td className="py-2 pr-4">Publikus</td><td className="py-2">Backend API URL</td></tr>
                 <tr className="border-b border-border/50"><td className="py-2 pr-4 font-mono text-xs">VITE_SUPABASE_PUBLISHABLE_KEY</td><td className="py-2 pr-4">Publikus</td><td className="py-2">Anon/publishable API kulcs</td></tr>
                 <tr className="border-b border-border/50"><td className="py-2 pr-4 font-mono text-xs">LOVABLE_API_KEY</td><td className="py-2 pr-4">Secret (backend)</td><td className="py-2">AI Gateway hozzáférés (Edge Functions-ben)</td></tr>
-                <tr><td className="py-2 pr-4 font-mono text-xs">ELEVENLABS_API_KEY</td><td className="py-2 pr-4">Secret (backend)</td><td className="py-2">ElevenLabs TTS API (opcionális)</td></tr>
+                
               </tbody>
             </table>
           </div>
@@ -348,7 +336,7 @@ supabase/functions/
             <li><strong>Képgenerálás multi-model fallback:</strong> Két különböző Gemini modellt próbál, majd graceful null-t ad vissza</li>
             <li><strong>Rate limiting:</strong> 429-es válasz esetén felhasználó-barát hibaüzenet</li>
             <li><strong>Edge Function retry:</strong> A képgenerálás max 2 próbálkozást tesz a frontend oldalon</li>
-            <li><strong>TTS fallback:</strong> Web Speech API-t használ (böngésző natív), nem függ külső szolgáltatástól</li>
+            <li><strong>TTS:</strong> Web Speech API-t használ (böngésző natív), nem függ külső szolgáltatástól</li>
           </ul>
         </section>
 
