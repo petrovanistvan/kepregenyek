@@ -273,7 +273,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
                 )}
               </div>
             )}
-            <div className="mt-4 flex justify-center">
+            <div className="mt-4 flex justify-center gap-3">
               <button
                 onClick={handleRegenerate}
                 disabled={imageLoading[selectedIndex] || summaryLoading[selectedIndex]}
@@ -281,6 +281,14 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
               >
                 <RefreshCw className={`h-4 w-4 ${imageLoading[selectedIndex] || summaryLoading[selectedIndex] ? "animate-spin" : ""}`} />
                 Újragenerálás
+              </button>
+              <button
+                onClick={() => handleMoreLikeThis(selectedRec)}
+                disabled={moreLikeThisLoading}
+                className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
+              >
+                <Sparkles className={`h-4 w-4 ${moreLikeThisLoading ? "animate-spin" : ""}`} />
+                Még több ilyet
               </button>
             </div>
           </div>
