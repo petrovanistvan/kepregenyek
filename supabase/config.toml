@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.generate-recommendations]
 verify_jwt = false
+
+[functions.generate-more-like-this]
+verify_jwt = false
