@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { ChevronDown, ChevronUp, BookOpen, Star, X, Volume2, Square, Loader2, ImageIcon, RefreshCw } from "lucide-react";
-import type { RecommendationResult } from "@/hooks/useRecommender";
+import { ChevronDown, ChevronUp, BookOpen, Star, X, Volume2, Square, Loader2, ImageIcon, RefreshCw, Sparkles } from "lucide-react";
+import type { RecommendationResult, Recommendation } from "@/hooks/useRecommender";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -19,6 +19,9 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
   const [imageLoading, setImageLoading] = useState<Record<number, boolean>>({});
   const [generatedSummaries, setGeneratedSummaries] = useState<Record<number, string>>({});
   const [summaryLoading, setSummaryLoading] = useState<Record<number, boolean>>({});
+  const [moreLikeThis, setMoreLikeThis] = useState<Recommendation[] | null>(null);
+  const [moreLikeThisLoading, setMoreLikeThisLoading] = useState(false);
+  const [moreLikeThisSource, setMoreLikeThisSource] = useState<string | null>(null);
 
   const { toast } = useToast();
   const selectedRec = selectedIndex !== null ? result.recommendations[selectedIndex] : null;
@@ -127,6 +130,31 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
     setTtsPlaying(false);
 
     void generateAssets(idx, rec, { force: true });
+  };
+
+  const handleMoreLikeThis = async (rec: Recommendation) => {
+    setMoreLikeThisLoading(true);
+    setMoreLikeThis(null);
+    setMoreLikeThisSource(rec.title);
+
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("generate-more-like-this", {
+        body: { title: rec.title, description: rec.description },
+      });
+
+      if (fnError) throw new Error(fnError.message);
+      if (data?.error) throw new Error(data.error);
+
+      setMoreLikeThis(data.recommendations || []);
+    } catch (err: any) {
+      toast({
+        title: "Hiba történt",
+        description: err.message || "Nem sikerült hasonló ajánlásokat kérni.",
+        variant: "destructive",
+      });
+    } finally {
+      setMoreLikeThisLoading(false);
+    }
   };
 
   return (
@@ -245,7 +273,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
                 )}
               </div>
             )}
-            <div className="mt-4 flex justify-center">
+            <div className="mt-4 flex justify-center gap-3">
               <button
                 onClick={handleRegenerate}
                 disabled={imageLoading[selectedIndex] || summaryLoading[selectedIndex]}
@@ -254,8 +282,57 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
                 <RefreshCw className={`h-4 w-4 ${imageLoading[selectedIndex] || summaryLoading[selectedIndex] ? "animate-spin" : ""}`} />
                 Újragenerálás
               </button>
+              <button
+                onClick={() => handleMoreLikeThis(selectedRec)}
+                disabled={moreLikeThisLoading}
+                className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
+              >
+                <Sparkles className={`h-4 w-4 ${moreLikeThisLoading ? "animate-spin" : ""}`} />
+                Még több ilyet
+              </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* More like this results */}
+      {(moreLikeThis || moreLikeThisLoading) && (
+        <div className="mt-8 animate-fade-in">
+          <h3 className="mb-4 flex items-center gap-2 text-lg font-bold">
+            <Sparkles className="h-5 w-5 text-accent" />
+            Hasonló ajánlások – {moreLikeThisSource}
+          </h3>
+          {moreLikeThisLoading ? (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              <span>Hasonló képregények keresése…</span>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {moreLikeThis?.map((rec, i) => (
+                <div
+                  key={i}
+                  className="comic-panel-sm p-4 animate-slide-in"
+                  style={{ animationDelay: `${i * 80}ms` }}
+                >
+                  <div className="flex items-start gap-3">
+                    <BookOpen className="mt-1 h-5 w-5 shrink-0 text-accent" />
+                    <div>
+                      <h4 className="font-bold">{rec.title}</h4>
+                      <p className="mt-1 text-sm text-muted-foreground">{rec.description}</p>
+                      <p className="mt-1 text-sm italic text-accent-foreground">"{rec.why}"</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <button
+            onClick={() => { setMoreLikeThis(null); setMoreLikeThisSource(null); }}
+            className="mt-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            ✕ Bezárás
+          </button>
         </div>
       )}
 
