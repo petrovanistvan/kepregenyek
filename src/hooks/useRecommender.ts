@@ -78,8 +78,14 @@ export function useRecommender(): UseRecommenderReturn {
       setError(null);
 
       try {
-        // Try AI first
-        const aiResult = await getRecommendationsFromAI(answers);
+        // Try AI first with timeout so fallback can kick in fast
+        const aiResult = await Promise.race<RecommendationResult>([
+          getRecommendationsFromAI(answers),
+          new Promise<RecommendationResult>((_, reject) =>
+            setTimeout(() => reject(new Error("AI recommendation timeout")), 25000)
+          ),
+        ]);
+
         setResult(aiResult);
       } catch (aiErr: any) {
         console.warn("AI recommendation failed, falling back to Pyodide:", aiErr.message);
