@@ -97,7 +97,6 @@ const Documentation = () => {
 │  │  • generate-comic-image      (AI képgenerálás)    │       │
 │  │  • generate-comic-summary    (AI ismertető)       │       │
 │  │  • generate-more-like-this   (hasonló ajánlások)  │       │
-│  │  • elevenlabs-tts            (szövegfelolvasás)   │       │
 │  └──────────────────────────────────────────────────┘       │
 └──────────────────────────────────────────────────────────────┘`}
           </pre>
