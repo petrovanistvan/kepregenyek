@@ -231,7 +231,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
       </div>
 
       {/* Detail overlay */}
-      {selectedRec && selectedIndex !== null && (
+      {selectedRec && modalKey !== null && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in"
           onClick={handleCloseModal}
