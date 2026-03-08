@@ -162,8 +162,20 @@ Do NOT depict any trademarked or copyrighted characters. Instead, create origina
       }
 
       const data = await response.json();
+      console.log(`Response structure (${model}):`, JSON.stringify(Object.keys(data?.choices?.[0]?.message || {})));
+      if (data?.choices?.[0]?.message?.images) {
+        console.log("Images array found, length:", data.choices[0].message.images.length);
+      }
+      if (Array.isArray(data?.choices?.[0]?.message?.content)) {
+        console.log("Content types:", data.choices[0].message.content.map((c: any) => c?.type));
+      }
       imageUrl = extractImageUrl(data);
-      if (imageUrl) break;
+      if (imageUrl) {
+        console.log(`Image extracted successfully from ${model}, URL starts with:`, imageUrl.substring(0, 30));
+        break;
+      } else {
+        console.warn(`No image URL extracted from ${model} response`);
+      }
     }
 
     if (!imageUrl) {
