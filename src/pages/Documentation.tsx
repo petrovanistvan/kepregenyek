@@ -138,8 +138,7 @@ supabase/functions/
 ├── generate-recommendations/  # AI ajánlás edge function
 ├── generate-comic-image/      # Képgenerálás edge function
 ├── generate-comic-summary/    # Ismertető generálás
-├── generate-more-like-this/   # Hasonló ajánlások
-└── elevenlabs-tts/            # Szövegfelolvasás (ElevenLabs)`}
+└── generate-more-like-this/   # Hasonló ajánlások`}
           </pre>
         </section>
 
