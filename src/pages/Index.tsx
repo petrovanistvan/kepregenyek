@@ -1,6 +1,7 @@
 import { BookOpen } from "lucide-react";
 import LoadingScreen from "@/components/LoadingScreen";
 import QuizWizard from "@/components/QuizWizard";
+import ThemeToggle from "@/components/ThemeToggle";
 import { usePyodide } from "@/hooks/usePyodide";
 
 const Index = () => {
