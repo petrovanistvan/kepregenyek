@@ -295,6 +295,47 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
         </div>
       )}
 
+      {/* More like this results */}
+      {(moreLikeThis || moreLikeThisLoading) && (
+        <div className="mt-8 animate-fade-in">
+          <h3 className="mb-4 flex items-center gap-2 text-lg font-bold">
+            <Sparkles className="h-5 w-5 text-accent" />
+            Hasonló ajánlások – {moreLikeThisSource}
+          </h3>
+          {moreLikeThisLoading ? (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              <span>Hasonló képregények keresése…</span>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {moreLikeThis?.map((rec, i) => (
+                <div
+                  key={i}
+                  className="comic-panel-sm p-4 animate-slide-in"
+                  style={{ animationDelay: `${i * 80}ms` }}
+                >
+                  <div className="flex items-start gap-3">
+                    <BookOpen className="mt-1 h-5 w-5 shrink-0 text-accent" />
+                    <div>
+                      <h4 className="font-bold">{rec.title}</h4>
+                      <p className="mt-1 text-sm text-muted-foreground">{rec.description}</p>
+                      <p className="mt-1 text-sm italic text-accent-foreground">"{rec.why}"</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <button
+            onClick={() => { setMoreLikeThis(null); setMoreLikeThisSource(null); }}
+            className="mt-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            ✕ Bezárás
+          </button>
+        </div>
+      )}
+
       {/* Why these? */}
       <div className="mt-8">
         <button
