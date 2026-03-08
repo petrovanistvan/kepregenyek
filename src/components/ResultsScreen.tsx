@@ -156,6 +156,8 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
       setMoreLikeThisLoading(false);
     }
   };
+
+  return (
     <div className="mx-auto max-w-2xl animate-slide-in">
       <div className="mb-8 text-center">
         <Star className="mx-auto mb-3 h-12 w-12 text-accent" />
