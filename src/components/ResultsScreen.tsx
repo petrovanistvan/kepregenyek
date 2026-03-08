@@ -137,6 +137,11 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
     setMoreLikeThis(null);
     setMoreLikeThisSource(rec.title);
 
+    // Scroll to the section after a tick so the DOM renders
+    setTimeout(() => {
+      moreLikeThisRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+
     try {
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-more-like-this`,
