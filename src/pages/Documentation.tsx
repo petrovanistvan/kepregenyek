@@ -373,6 +373,158 @@ supabase/functions/
           </ol>
         </section>
 
+        {/* Prompt Napló */}
+        <section className="mb-10">
+          <h2 className="mb-3 text-2xl font-bold text-foreground">📓 Prompt Napló – Fejlesztési mérföldkövek</h2>
+          <p className="mb-4 leading-relaxed text-foreground/90">
+            Az alábbi napló az alkalmazás fejlesztésének legfontosabb lépéseit dokumentálja időrendi sorrendben,
+            a felhasználó (prompt szerző) és az AI (Lovable) közötti együttműködés alapján.
+          </p>
+
+          <div className="space-y-6">
+            {/* Mérföldkő 1 */}
+            <div className="rounded-lg border border-border bg-card p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-block rounded-full bg-primary/20 px-3 py-0.5 text-xs font-bold text-primary">1. fázis</span>
+                <span className="text-xs text-muted-foreground">Alapok</span>
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-1">🧱 Alap kvíz rendszer felépítése</h3>
+              <p className="text-sm text-foreground/80 mb-2">
+                <strong>Prompt lényege:</strong> „Készíts egy képregény ajánló kvízt, ahol a felhasználó 6 igen/nem kérdésre válaszol."
+              </p>
+              <ul className="list-disc pl-5 text-sm text-foreground/70 space-y-1">
+                <li>6 kérdéses kvíz komponens létrehozása (<code className="rounded bg-muted px-1 text-xs">QuizWizard</code>, <code className="rounded bg-muted px-1 text-xs">QuestionCard</code>)</li>
+                <li>Kérdések JSON fájlból betöltve (<code className="rounded bg-muted px-1 text-xs">questions.json</code>)</li>
+                <li>Progress bar, animált kártya-váltás</li>
+                <li>Alapvető UI: sötét téma, képregény-stílusú design</li>
+              </ul>
+            </div>
+
+            {/* Mérföldkő 2 */}
+            <div className="rounded-lg border border-border bg-card p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-block rounded-full bg-primary/20 px-3 py-0.5 text-xs font-bold text-primary">2. fázis</span>
+                <span className="text-xs text-muted-foreground">Backend logika</span>
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-1">🐍 Pyodide Python ajánlómotor</h3>
+              <p className="text-sm text-foreground/80 mb-2">
+                <strong>Prompt lényege:</strong> „A kvíz válaszai alapján egy Python-alapú ajánlórendszer válasszon képregényeket egy adatbázisból."
+              </p>
+              <ul className="list-disc pl-5 text-sm text-foreground/70 space-y-1">
+                <li>Pyodide integráció – Python futtatás közvetlenül a böngészőben</li>
+                <li><code className="rounded bg-muted px-1 text-xs">recommender.py</code> megírása: súlyozás, szűrés, pontozás a válaszok alapján</li>
+                <li><code className="rounded bg-muted px-1 text-xs">comic_database.json</code> létrehozása 50+ képregénnyel (DC + Marvel)</li>
+                <li>Betöltési képernyő amíg a Python motor inicializálódik</li>
+              </ul>
+            </div>
+
+            {/* Mérföldkő 3 */}
+            <div className="rounded-lg border border-border bg-card p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-block rounded-full bg-primary/20 px-3 py-0.5 text-xs font-bold text-primary">3. fázis</span>
+                <span className="text-xs text-muted-foreground">AI integráció</span>
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-1">🤖 AI-alapú ajánlások (Gemini)</h3>
+              <p className="text-sm text-foreground/80 mb-2">
+                <strong>Prompt lényege:</strong> „Használj AI-t az ajánlások generálásához, a Python motor legyen fallback."
+              </p>
+              <ul className="list-disc pl-5 text-sm text-foreground/70 space-y-1">
+                <li><code className="rounded bg-muted px-1 text-xs">generate-recommendations</code> Edge Function létrehozása</li>
+                <li>Gemini modell használata strukturált JSON válaszokkal</li>
+                <li>Pyodide automatikus fallback, ha az AI nem elérhető</li>
+                <li>Hibakezelés és retry logika</li>
+              </ul>
+            </div>
+
+            {/* Mérföldkő 4 */}
+            <div className="rounded-lg border border-border bg-card p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-block rounded-full bg-primary/20 px-3 py-0.5 text-xs font-bold text-primary">4. fázis</span>
+                <span className="text-xs text-muted-foreground">Vizuális tartalom</span>
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-1">🎨 AI képgenerálás</h3>
+              <p className="text-sm text-foreground/80 mb-2">
+                <strong>Prompt lényege:</strong> „Generálj egyedi illusztrációkat minden ajánlott képregényhez."
+              </p>
+              <ul className="list-disc pl-5 text-sm text-foreground/70 space-y-1">
+                <li><code className="rounded bg-muted px-1 text-xs">generate-comic-image</code> Edge Function</li>
+                <li>Copyright-safe prompt generálás (nem másolja az eredeti borítókat)</li>
+                <li>Multi-model fallback stratégia</li>
+                <li>Base64 kép megjelenítés a kártyákon</li>
+              </ul>
+            </div>
+
+            {/* Mérföldkő 5 */}
+            <div className="rounded-lg border border-border bg-card p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-block rounded-full bg-primary/20 px-3 py-0.5 text-xs font-bold text-primary">5. fázis</span>
+                <span className="text-xs text-muted-foreground">Tartalom & hang</span>
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-1">📝 AI ismertetők és szövegfelolvasás</h3>
+              <p className="text-sm text-foreground/80 mb-2">
+                <strong>Prompt lényege:</strong> „Írj spoilermentes ismertetőt és add hozzá a felolvasás lehetőségét."
+              </p>
+              <ul className="list-disc pl-5 text-sm text-foreground/70 space-y-1">
+                <li><code className="rounded bg-muted px-1 text-xs">generate-comic-summary</code> Edge Function</li>
+                <li>Spoilermentes, magyar nyelvű ismertetők generálása</li>
+                <li>Web Speech API integráció szövegfelolvasáshoz</li>
+                <li>Betöltési állapotok és skeleton UI</li>
+              </ul>
+            </div>
+
+            {/* Mérföldkő 6 */}
+            <div className="rounded-lg border border-border bg-card p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-block rounded-full bg-primary/20 px-3 py-0.5 text-xs font-bold text-primary">6. fázis</span>
+                <span className="text-xs text-muted-foreground">Felfedezés</span>
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-1">🔍 „Még több ilyet" funkció</h3>
+              <p className="text-sm text-foreground/80 mb-2">
+                <strong>Prompt lényege:</strong> „Ha egy képregény tetszik, ajánlj hasonlóakat is."
+              </p>
+              <ul className="list-disc pl-5 text-sm text-foreground/70 space-y-1">
+                <li><code className="rounded bg-muted px-1 text-xs">generate-more-like-this</code> Edge Function</li>
+                <li>Hasonló képregények kártyái kattinthatóak – modal megnyílik képpel és ismertetővel</li>
+                <li>Láncszerű böngészés: hasonlóból tovább lehet navigálni</li>
+              </ul>
+            </div>
+
+            {/* Mérföldkő 7 */}
+            <div className="rounded-lg border border-border bg-card p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-block rounded-full bg-primary/20 px-3 py-0.5 text-xs font-bold text-primary">7. fázis</span>
+                <span className="text-xs text-muted-foreground">UI/UX finomítás</span>
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-1">🌙 Dark mode és design javítások</h3>
+              <p className="text-sm text-foreground/80 mb-2">
+                <strong>Prompt lényege:</strong> „A sötét módban nem jól látszanak a szövegek, javítsd a kontrasztot."
+              </p>
+              <ul className="list-disc pl-5 text-sm text-foreground/70 space-y-1">
+                <li>Szöveg kontraszt javítása dark mode-ban</li>
+                <li>Semantic design tokenek következetes használata</li>
+                <li>Kártyák, gombok, modal stílusok finomhangolása</li>
+              </ul>
+            </div>
+
+            {/* Mérföldkő 8 */}
+            <div className="rounded-lg border border-border bg-card p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-block rounded-full bg-primary/20 px-3 py-0.5 text-xs font-bold text-primary">8. fázis</span>
+                <span className="text-xs text-muted-foreground">Dokumentáció</span>
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-1">📄 Technikai dokumentáció és prompt napló</h3>
+              <p className="text-sm text-foreground/80 mb-2">
+                <strong>Prompt lényege:</strong> „Generálj teljeskörű technikai dokumentációt PDF-be menthető formában, és adj hozzá prompt naplót."
+              </p>
+              <ul className="list-disc pl-5 text-sm text-foreground/70 space-y-1">
+                <li><code className="rounded bg-muted px-1 text-xs">/docs</code> oldal létrehozása nyomtatható CSS-sel</li>
+                <li>Architektúra, adatfolyam, komponensek, Edge Function-ök dokumentálása</li>
+                <li>Fejlesztési mérföldkövek prompt napló formájában</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
         {/* Footer */}
         <hr className="my-6 border-border" />
         <p className="text-center text-xs text-muted-foreground">
