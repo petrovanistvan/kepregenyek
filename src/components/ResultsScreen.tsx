@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChevronDown, ChevronUp, BookOpen, Star, X, Volume2, Square, Loader2, ImageIcon, RefreshCw, Sparkles } from "lucide-react";
 import type { RecommendationResult, Recommendation } from "@/hooks/useRecommender";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +14,7 @@ interface ResultsScreenProps {
 const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenProps) => {
   const [showReasoning, setShowReasoning] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const moreLikeThisRef = useRef<HTMLDivElement>(null);
   const [ttsPlaying, setTtsPlaying] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<Record<number, string>>({});
   const [imageLoading, setImageLoading] = useState<Record<number, boolean>>({});
@@ -135,6 +136,11 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
     setMoreLikeThisLoading(cardIndex);
     setMoreLikeThis(null);
     setMoreLikeThisSource(rec.title);
+
+    // Scroll to the section after a tick so the DOM renders
+    setTimeout(() => {
+      moreLikeThisRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
 
     try {
       const response = await fetch(
@@ -319,7 +325,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
 
       {/* More like this results */}
       {(moreLikeThis || moreLikeThisLoading !== null) && (
-        <div className="mt-8 animate-fade-in">
+        <div ref={moreLikeThisRef} className="mt-8 animate-fade-in">
           <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground">
             <Sparkles className="h-5 w-5 text-accent" />
             Hasonló ajánlások – {moreLikeThisSource}
