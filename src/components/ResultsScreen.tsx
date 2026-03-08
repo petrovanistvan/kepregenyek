@@ -20,7 +20,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
   const [generatedSummaries, setGeneratedSummaries] = useState<Record<number, string>>({});
   const [summaryLoading, setSummaryLoading] = useState<Record<number, boolean>>({});
   const [moreLikeThis, setMoreLikeThis] = useState<Recommendation[] | null>(null);
-  const [moreLikeThisLoading, setMoreLikeThisLoading] = useState(false);
+  const [moreLikeThisLoading, setMoreLikeThisLoading] = useState<number | null>(null);
   const [moreLikeThisSource, setMoreLikeThisSource] = useState<string | null>(null);
 
   const { toast } = useToast();
@@ -79,7 +79,6 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
   useEffect(() => {
     if (selectedIndex === null) return;
     const rec = result.recommendations[selectedIndex];
-    // Generate both image and summary in parallel; don't show stale static text
     void generateAssets(selectedIndex, rec, { silent: true });
   }, [selectedIndex]);
 
@@ -132,28 +131,42 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
     void generateAssets(idx, rec, { force: true });
   };
 
-  const handleMoreLikeThis = async (rec: Recommendation) => {
-    setMoreLikeThisLoading(true);
+  const handleMoreLikeThis = async (rec: Recommendation, cardIndex: number) => {
+    setMoreLikeThisLoading(cardIndex);
     setMoreLikeThis(null);
     setMoreLikeThisSource(rec.title);
 
     try {
-      const { data, error: fnError } = await supabase.functions.invoke("generate-more-like-this", {
-        body: { title: rec.title, description: rec.description },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-more-like-this`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ title: rec.title, description: rec.description }),
+        }
+      );
 
-      if (fnError) throw new Error(fnError.message);
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || `HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
       if (data?.error) throw new Error(data.error);
 
       setMoreLikeThis(data.recommendations || []);
     } catch (err: any) {
+      console.error("More like this error:", err);
       toast({
         title: "Hiba történt",
         description: err.message || "Nem sikerült hasonló ajánlásokat kérni.",
         variant: "destructive",
       });
     } finally {
-      setMoreLikeThisLoading(false);
+      setMoreLikeThisLoading(null);
     }
   };
 
@@ -169,23 +182,40 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
 
       <div className="space-y-4">
         {result.recommendations.map((rec, i) => (
-          <button
+          <div
             key={i}
-            onClick={() => setSelectedIndex(i)}
-            className="comic-panel-sm w-full p-5 text-left animate-slide-in transition-transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            className="comic-panel-sm w-full p-5 text-left animate-slide-in"
             style={{ animationDelay: `${i * 80}ms` }}
           >
-            <div className="flex items-start gap-3">
-              <BookOpen className="mt-1 h-5 w-5 shrink-0 text-accent" />
-              <div>
-                <h3 className="text-lg font-bold">{rec.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{rec.description}</p>
-                <p className="mt-2 text-sm font-medium italic text-accent-foreground">
-                  "{rec.why}"
-                </p>
+            <button
+              onClick={() => setSelectedIndex(i)}
+              className="w-full text-left transition-transform hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+            >
+              <div className="flex items-start gap-3">
+                <BookOpen className="mt-1 h-5 w-5 shrink-0 text-accent" />
+                <div>
+                  <h3 className="text-lg font-bold text-foreground">{rec.title}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{rec.description}</p>
+                  <p className="mt-2 text-sm font-medium italic text-foreground/80">
+                    "{rec.why}"
+                  </p>
+                </div>
               </div>
+            </button>
+            <div className="mt-3 flex justify-end">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleMoreLikeThis(rec, i);
+                }}
+                disabled={moreLikeThisLoading !== null}
+                className="flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
+              >
+                <Sparkles className={`h-3.5 w-3.5 ${moreLikeThisLoading === i ? "animate-spin" : ""}`} />
+                Még több ilyet
+              </button>
             </div>
-          </button>
+          </div>
         ))}
       </div>
 
@@ -230,7 +260,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
             </div>
 
             <BookOpen className="mb-3 h-8 w-8 text-accent" />
-            <h2 className="mb-1 text-2xl font-bold">{selectedRec.title}</h2>
+            <h2 className="mb-1 text-2xl font-bold text-foreground">{selectedRec.title}</h2>
             <p className="mb-4 text-sm text-muted-foreground">{selectedRec.description}</p>
             <div className="rounded-lg bg-secondary p-4">
               <div className="mb-2 flex items-center justify-between">
@@ -250,13 +280,13 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
                   {ttsPlaying ? "Leállítás" : "Felolvasás"}
                 </button>
               </div>
-            {summaryLoading[selectedIndex] || (!currentSummary && !summaryLoading[selectedIndex] && selectedIndex !== null) ? (
+              {summaryLoading[selectedIndex] || (!currentSummary && !summaryLoading[selectedIndex] && selectedIndex !== null) ? (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   <span>Ismertető generálása…</span>
                 </div>
               ) : (
-                <p className="text-sm leading-relaxed">{currentSummary}</p>
+                <p className="text-sm leading-relaxed text-secondary-foreground">{currentSummary}</p>
               )}
             </div>
             {selectedRec.details && (
@@ -273,7 +303,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
                 )}
               </div>
             )}
-            <div className="mt-4 flex justify-center gap-3">
+            <div className="mt-4 flex justify-center">
               <button
                 onClick={handleRegenerate}
                 disabled={imageLoading[selectedIndex] || summaryLoading[selectedIndex]}
@@ -282,27 +312,19 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
                 <RefreshCw className={`h-4 w-4 ${imageLoading[selectedIndex] || summaryLoading[selectedIndex] ? "animate-spin" : ""}`} />
                 Újragenerálás
               </button>
-              <button
-                onClick={() => handleMoreLikeThis(selectedRec)}
-                disabled={moreLikeThisLoading}
-                className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
-              >
-                <Sparkles className={`h-4 w-4 ${moreLikeThisLoading ? "animate-spin" : ""}`} />
-                Még több ilyet
-              </button>
             </div>
           </div>
         </div>
       )}
 
       {/* More like this results */}
-      {(moreLikeThis || moreLikeThisLoading) && (
+      {(moreLikeThis || moreLikeThisLoading !== null) && (
         <div className="mt-8 animate-fade-in">
-          <h3 className="mb-4 flex items-center gap-2 text-lg font-bold">
+          <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground">
             <Sparkles className="h-5 w-5 text-accent" />
             Hasonló ajánlások – {moreLikeThisSource}
           </h3>
-          {moreLikeThisLoading ? (
+          {moreLikeThisLoading !== null ? (
             <div className="flex items-center gap-2 text-muted-foreground">
               <Loader2 className="h-5 w-5 animate-spin" />
               <span>Hasonló képregények keresése…</span>
@@ -318,9 +340,9 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
                   <div className="flex items-start gap-3">
                     <BookOpen className="mt-1 h-5 w-5 shrink-0 text-accent" />
                     <div>
-                      <h4 className="font-bold">{rec.title}</h4>
+                      <h4 className="font-bold text-foreground">{rec.title}</h4>
                       <p className="mt-1 text-sm text-muted-foreground">{rec.description}</p>
-                      <p className="mt-1 text-sm italic text-accent-foreground">"{rec.why}"</p>
+                      <p className="mt-1 text-sm italic text-foreground/80">"{rec.why}"</p>
                     </div>
                   </div>
                 </div>
@@ -340,7 +362,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
       <div className="mt-8">
         <button
           onClick={() => setShowReasoning(!showReasoning)}
-          className="flex w-full items-center justify-between rounded-lg bg-secondary px-5 py-3 font-semibold transition-colors hover:bg-muted"
+          className="flex w-full items-center justify-between rounded-lg bg-secondary px-5 py-3 font-semibold text-foreground transition-colors hover:bg-muted"
         >
           <span>Miért ezeket ajánljuk?</span>
           {showReasoning ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -349,13 +371,13 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
         {showReasoning && (
           <div className="mt-3 rounded-lg border border-border bg-card p-5 animate-fade-in">
             <p className="mb-4 text-sm text-muted-foreground">{result.reasoning}</p>
-            <h4 className="mb-2 font-bold text-sm">Válaszaid:</h4>
+            <h4 className="mb-2 font-bold text-sm text-foreground">Válaszaid:</h4>
             <ul className="space-y-1 text-sm">
               {questions.map((q) => (
                 <li key={q.id} className="flex items-center gap-2">
                   <span>{q.icon}</span>
                   <span className="text-muted-foreground">{q.text}</span>
-                  <span className="ml-auto font-bold">
+                  <span className="ml-auto font-bold text-foreground">
                     {answers[q.id] ? "✅ Igen" : "❌ Nem"}
                   </span>
                 </li>
@@ -368,7 +390,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
       <div className="mt-8 text-center">
         <button
           onClick={onRestart}
-          className="comic-panel-sm px-8 py-3 font-bold transition-transform hover:scale-105 active:scale-95"
+          className="comic-panel-sm px-8 py-3 font-bold text-foreground transition-transform hover:scale-105 active:scale-95"
         >
           🔄 Újrakezdés
         </button>
