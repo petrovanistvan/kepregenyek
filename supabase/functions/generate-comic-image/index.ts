@@ -11,6 +11,15 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const apikey = req.headers.get('apikey');
+  const expectedKey = Deno.env.get("SUPABASE_ANON_KEY");
+  if (!apikey || apikey !== expectedKey) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const { title, summary } = await req.json();
 
@@ -19,7 +28,6 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Use a generic artistic prompt to avoid copyright refusals
     const prompt = `Create a dramatic, cinematic digital painting inspired by the concept: "${title}".
 Context: ${summary || title}
 
@@ -64,23 +72,15 @@ Do NOT depict any trademarked or copyrighted characters. Instead, create origina
         }
         const t = await response.text();
         console.error(`AI gateway error (${model}):`, response.status, t);
-        continue; // try next model
+        continue;
       }
 
       const data = await response.json();
-      console.log(`Response from ${model}:`, JSON.stringify({
-        hasChoices: !!data.choices,
-        hasImages: !!data.choices?.[0]?.message?.images,
-        imageCount: data.choices?.[0]?.message?.images?.length ?? 0,
-        contentPreview: data.choices?.[0]?.message?.content?.substring(0, 200),
-      }));
-
       imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url ?? null;
       if (imageUrl) break;
     }
 
     if (!imageUrl) {
-      // Return a graceful fallback instead of 500
       return new Response(
         JSON.stringify({ imageUrl: null, error: "Image generation unavailable" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -94,7 +94,7 @@ Do NOT depict any trademarked or copyrighted characters. Instead, create origina
   } catch (e) {
     console.error("generate-comic-image error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
+      JSON.stringify({ error: "Image generation service error, please try again." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

@@ -11,6 +11,15 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const apikey = req.headers.get('apikey');
+  const expectedKey = Deno.env.get("SUPABASE_ANON_KEY");
+  if (!apikey || apikey !== expectedKey) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const { answers, questions } = await req.json();
 
@@ -19,7 +28,6 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Build a human-readable preference summary from quiz answers
     const questionMap: Record<string, string> = {};
     for (const q of questions) {
       questionMap[q.id] = q.text;
@@ -93,15 +101,12 @@ Válaszolj KIZÁRÓLAG az alábbi JSON formátumban, semmi más szöveget ne adj
       }
       const t = await response.text();
       console.error("AI gateway error:", response.status, t);
-      throw new Error(`AI gateway error: ${response.status}`);
+      throw new Error("AI service error");
     }
 
     const data = await response.json();
     let content = data.choices?.[0]?.message?.content ?? "";
-
-    // Strip markdown code fences if present
     content = content.replace(/```json\s*/gi, "").replace(/```\s*/gi, "").trim();
-
     const parsed = JSON.parse(content);
 
     return new Response(JSON.stringify(parsed), {
@@ -111,7 +116,7 @@ Válaszolj KIZÁRÓLAG az alábbi JSON formátumban, semmi más szöveget ne adj
   } catch (e) {
     console.error("generate-recommendations error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
+      JSON.stringify({ error: "Recommendation service error, please try again." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

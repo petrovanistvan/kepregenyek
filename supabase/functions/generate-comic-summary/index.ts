@@ -11,6 +11,15 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const apikey = req.headers.get('apikey');
+  const expectedKey = Deno.env.get("SUPABASE_ANON_KEY");
+  if (!apikey || apikey !== expectedKey) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const { title, description, why } = await req.json();
 
@@ -60,7 +69,7 @@ Csak az ismertetőt írd, semmilyen bevezető szöveget vagy címet ne adj hozz�
       }
       const t = await response.text();
       console.error("AI gateway error:", response.status, t);
-      throw new Error(`AI gateway error: ${response.status}`);
+      throw new Error("AI service error");
     }
 
     const data = await response.json();
@@ -73,7 +82,7 @@ Csak az ismertetőt írd, semmilyen bevezető szöveget vagy címet ne adj hozz�
   } catch (e) {
     console.error("generate-comic-summary error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
+      JSON.stringify({ error: "Summary service error, please try again." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
