@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX = 10;
+const RATE_LIMIT_MAX = 20;
 const ipHits = new Map<string, number[]>();
 
 function isRateLimited(ip: string): boolean {
