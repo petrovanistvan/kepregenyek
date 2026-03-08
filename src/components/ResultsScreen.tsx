@@ -317,10 +317,10 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
             <div className="mt-4 flex justify-center">
               <button
                 onClick={handleRegenerate}
-                disabled={imageLoading[selectedIndex] || summaryLoading[selectedIndex]}
+                disabled={imageLoading[modalKey] || summaryLoading[modalKey]}
                 className="flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
               >
-                <RefreshCw className={`h-4 w-4 ${imageLoading[selectedIndex] || summaryLoading[selectedIndex] ? "animate-spin" : ""}`} />
+                <RefreshCw className={`h-4 w-4 ${imageLoading[modalKey] || summaryLoading[modalKey] ? "animate-spin" : ""}`} />
                 Újragenerálás
               </button>
             </div>
