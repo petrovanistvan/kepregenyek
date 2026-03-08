@@ -251,14 +251,14 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
 
             {/* Generated image */}
             <div className="mb-4 aspect-[4/3] w-full overflow-hidden rounded-xl bg-muted flex items-center justify-center">
-              {imageLoading[selectedIndex] ? (
+              {imageLoading[modalKey] ? (
                 <div className="flex flex-col items-center gap-2 text-muted-foreground">
                   <Loader2 className="h-8 w-8 animate-spin" />
                   <span className="text-xs">Kép generálása…</span>
                 </div>
-              ) : generatedImages[selectedIndex] ? (
+              ) : generatedImages[modalKey] ? (
                 <img
-                  src={generatedImages[selectedIndex]}
+                  src={generatedImages[modalKey]}
                   alt={`${selectedRec.title} illusztráció`}
                   className="h-full w-full object-cover"
                 />
