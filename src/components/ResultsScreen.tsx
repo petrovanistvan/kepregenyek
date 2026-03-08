@@ -23,9 +23,10 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
   const [moreLikeThis, setMoreLikeThis] = useState<Recommendation[] | null>(null);
   const [moreLikeThisLoading, setMoreLikeThisLoading] = useState<number | null>(null);
   const [moreLikeThisSource, setMoreLikeThisSource] = useState<string | null>(null);
+  const [selectedMoreRec, setSelectedMoreRec] = useState<Recommendation | null>(null);
 
   const { toast } = useToast();
-  const selectedRec = selectedIndex !== null ? result.recommendations[selectedIndex] : null;
+  const selectedRec = selectedMoreRec ?? (selectedIndex !== null ? result.recommendations[selectedIndex] : null);
 
   const generateAssets = async (
     idx: number,
