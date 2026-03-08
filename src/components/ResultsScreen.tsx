@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChevronDown, ChevronUp, BookOpen, Star, X, Volume2, Square, Loader2, ImageIcon, RefreshCw, Sparkles } from "lucide-react";
 import type { RecommendationResult, Recommendation } from "@/hooks/useRecommender";
 import { supabase } from "@/integrations/supabase/client";
