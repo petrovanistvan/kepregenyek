@@ -325,7 +325,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
 
       {/* More like this results */}
       {(moreLikeThis || moreLikeThisLoading !== null) && (
-        <div className="mt-8 animate-fade-in">
+        <div ref={moreLikeThisRef} className="mt-8 animate-fade-in">
           <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground">
             <Sparkles className="h-5 w-5 text-accent" />
             Hasonló ajánlások – {moreLikeThisSource}
