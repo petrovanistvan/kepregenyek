@@ -132,7 +132,30 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
     void generateAssets(idx, rec, { force: true });
   };
 
-  return (
+  const handleMoreLikeThis = async (rec: Recommendation) => {
+    setMoreLikeThisLoading(true);
+    setMoreLikeThis(null);
+    setMoreLikeThisSource(rec.title);
+
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("generate-more-like-this", {
+        body: { title: rec.title, description: rec.description },
+      });
+
+      if (fnError) throw new Error(fnError.message);
+      if (data?.error) throw new Error(data.error);
+
+      setMoreLikeThis(data.recommendations || []);
+    } catch (err: any) {
+      toast({
+        title: "Hiba történt",
+        description: err.message || "Nem sikerült hasonló ajánlásokat kérni.",
+        variant: "destructive",
+      });
+    } finally {
+      setMoreLikeThisLoading(false);
+    }
+  };
     <div className="mx-auto max-w-2xl animate-slide-in">
       <div className="mb-8 text-center">
         <Star className="mx-auto mb-3 h-12 w-12 text-accent" />
