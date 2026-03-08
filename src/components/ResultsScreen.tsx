@@ -78,16 +78,19 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
     }
   };
 
-  useEffect(() => {
-    if (selectedIndex === null) return;
-    const rec = result.recommendations[selectedIndex];
-    void generateAssets(selectedIndex, rec, { silent: true });
-  }, [selectedIndex]);
+  // Compute a stable key for the currently selected recommendation
+  const modalKey = selectedMoreRec
+    ? `more-${selectedMoreRec.title}`
+    : selectedIndex !== null
+      ? selectedIndex
+      : null;
 
-  const currentSummary =
-    selectedIndex !== null
-      ? generatedSummaries[selectedIndex] || ""
-      : "";
+  useEffect(() => {
+    if (modalKey === null || !selectedRec) return;
+    void generateAssets(modalKey, selectedRec, { silent: true });
+  }, [modalKey]);
+
+  const currentSummary = modalKey !== null ? generatedSummaries[modalKey] || "" : "";
 
   const handleTts = (text: string) => {
     if (ttsPlaying) {
