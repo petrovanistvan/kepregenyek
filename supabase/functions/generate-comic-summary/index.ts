@@ -22,14 +22,33 @@ function isRateLimited(ip: string): boolean {
   return false;
 }
 
+function extractBearerToken(req: Request): string | null {
+  const authHeader = req.headers.get("authorization") || req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return null;
+  return authHeader.slice(7).trim();
+}
+
+function isAuthorized(req: Request): boolean {
+  const anonKeyFallback = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ6cGZ1amdzbW55bGxkeW5iZW5hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3NDE1NjgsImV4cCI6MjA4NzMxNzU2OH0._EQY1Uix5-29F3njLbaLT9q3fTrQxPkok_9ILeb9Eh0";
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY")?.trim();
+  const publishableKey = Deno.env.get("SUPABASE_PUBLISHABLE_KEY")?.trim();
+  const apikey = req.headers.get("apikey")?.trim();
+  const bearerToken = extractBearerToken(req);
+
+  const allowed = new Set([anonKey, publishableKey, anonKeyFallback].filter((v): v is string => Boolean(v)));
+
+  return Boolean(
+    (apikey && allowed.has(apikey)) ||
+    (bearerToken && allowed.has(bearerToken))
+  );
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const apikey = req.headers.get('apikey');
-  const expectedKey = Deno.env.get("SUPABASE_ANON_KEY");
-  if (!apikey || apikey !== expectedKey) {
+  if (!isAuthorized(req)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -93,6 +112,7 @@ Csak az ismertetőt írd, semmilyen bevezető szöveget vagy címet ne adj hozz�
             { role: "user", content: prompt },
           ],
         }),
+        signal: AbortSignal.timeout(20000),
       }
     );
 
@@ -121,7 +141,14 @@ Csak az ismertetőt írd, semmilyen bevezető szöveget vagy címet ne adj hozz�
       JSON.stringify({ summary }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (e) {
+  } catch (e: any) {
+    if (e?.name === "TimeoutError" || e?.name === "AbortError") {
+      return new Response(
+        JSON.stringify({ error: "Summary service timeout, please try again." }),
+        { status: 504, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     console.error("generate-comic-summary error:", e);
     return new Response(
       JSON.stringify({ error: "Summary service error, please try again." }),

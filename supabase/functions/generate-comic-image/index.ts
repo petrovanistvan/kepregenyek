@@ -22,14 +22,47 @@ function isRateLimited(ip: string): boolean {
   return false;
 }
 
+function extractBearerToken(req: Request): string | null {
+  const authHeader = req.headers.get("authorization") || req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return null;
+  return authHeader.slice(7).trim();
+}
+
+function isAuthorized(req: Request): boolean {
+  const anonKeyFallback = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ6cGZ1amdzbW55bGxkeW5iZW5hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3NDE1NjgsImV4cCI6MjA4NzMxNzU2OH0._EQY1Uix5-29F3njLbaLT9q3fTrQxPkok_9ILeb9Eh0";
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY")?.trim();
+  const publishableKey = Deno.env.get("SUPABASE_PUBLISHABLE_KEY")?.trim();
+  const apikey = req.headers.get("apikey")?.trim();
+  const bearerToken = extractBearerToken(req);
+
+  const allowed = new Set([anonKey, publishableKey, anonKeyFallback].filter((v): v is string => Boolean(v)));
+
+  return Boolean(
+    (apikey && allowed.has(apikey)) ||
+    (bearerToken && allowed.has(bearerToken))
+  );
+}
+
+function extractImageUrl(data: any): string | null {
+  const message = data?.choices?.[0]?.message;
+
+  const fromImages = message?.images?.[0]?.image_url?.url;
+  if (fromImages && typeof fromImages === "string") return fromImages;
+
+  const content = Array.isArray(message?.content) ? message.content : [];
+  const imagePart = content.find((item: any) => item?.type === "image_url");
+  const fromContent = imagePart?.image_url?.url;
+  if (fromContent && typeof fromContent === "string") return fromContent;
+
+  return null;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const apikey = req.headers.get('apikey');
-  const expectedKey = Deno.env.get("SUPABASE_ANON_KEY");
-  if (!apikey || apikey !== expectedKey) {
+  if (!isAuthorized(req)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -92,6 +125,7 @@ Do NOT depict any trademarked or copyrighted characters. Instead, create origina
             messages: [{ role: "user", content: prompt }],
             modalities: ["image", "text"],
           }),
+          signal: AbortSignal.timeout(25000),
         }
       );
 
@@ -114,7 +148,7 @@ Do NOT depict any trademarked or copyrighted characters. Instead, create origina
       }
 
       const data = await response.json();
-      imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url ?? null;
+      imageUrl = extractImageUrl(data);
       if (imageUrl) break;
     }
 
@@ -129,7 +163,14 @@ Do NOT depict any trademarked or copyrighted characters. Instead, create origina
       JSON.stringify({ imageUrl }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (e) {
+  } catch (e: any) {
+    if (e?.name === "TimeoutError" || e?.name === "AbortError") {
+      return new Response(
+        JSON.stringify({ error: "Image generation timeout, please try again." }),
+        { status: 504, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     console.error("generate-comic-image error:", e);
     return new Response(
       JSON.stringify({ error: "Image generation service error, please try again." }),

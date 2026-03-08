@@ -9,6 +9,12 @@ def filter_by_publisher(items: List[Dict], publisher: str) -> List[Dict]:
     return [c for c in items if c.get('publisher','').lower() == publisher.lower()]
 
 
+def get_universe_pool(comics: List[Dict], universe: str) -> List[Dict]:
+    if universe == "DC & Marvel":
+        return comics[:]
+    return filter_by_publisher(comics, universe)
+
+
 def price_per_page(c: Dict) -> float:
     price = c.get('price_huf')
     pages = c.get('pages')
@@ -93,11 +99,22 @@ def recommend(answers_json: str, comics_json: str) -> str:
     # Step 3: Rank and enrich
     ranked = enrich(rank(filtered))
 
-    # Fallback: if filters too strict, show all from universe
+    # Fallback: if filters too strict, show all from selected universe
     if not ranked:
-        ranked = enrich(rank(filter_by_publisher(comics, universe)))
+        ranked = enrich(rank(get_universe_pool(comics, universe)))
 
+    # Ensure we return at least 5 recommendations by backfilling from universe pool
     top = ranked[:8]
+    if len(top) < 5:
+        existing_titles = {c.get("title") for c in top}
+        universe_ranked = enrich(rank(get_universe_pool(comics, universe)))
+        for candidate in universe_ranked:
+            if candidate.get("title") in existing_titles:
+                continue
+            top.append(candidate)
+            existing_titles.add(candidate.get("title"))
+            if len(top) >= 5:
+                break
 
     # Build recommendations
     recs = []
@@ -123,7 +140,6 @@ def recommend(answers_json: str, comics_json: str) -> str:
 
     # Reasoning
     yes_list = [k for k, v in answers.items() if v]
-    no_list = [k for k, v in answers.items() if not v]
 
     labels = {
         "dc": "DC univerzum",

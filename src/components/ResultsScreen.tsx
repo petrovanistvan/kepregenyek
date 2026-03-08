@@ -147,27 +147,14 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
     }, 100);
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-more-like-this`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ title: rec.title, description: rec.description }),
-        }
-      );
+      const { data, error } = await supabase.functions.invoke("generate-more-like-this", {
+        body: { title: rec.title, description: rec.description },
+      });
 
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || `HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
+      if (error) throw new Error(error.message || "Hálózati hiba");
       if (data?.error) throw new Error(data.error);
 
-      setMoreLikeThis(data.recommendations || []);
+      setMoreLikeThis(data?.recommendations || []);
     } catch (err: any) {
       console.error("More like this error:", err);
       toast({
