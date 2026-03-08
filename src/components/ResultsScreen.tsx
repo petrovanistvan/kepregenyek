@@ -342,17 +342,22 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
               {moreLikeThis?.map((rec, i) => (
                 <div
                   key={i}
-                  className="comic-panel-sm p-4 animate-slide-in"
+                  className="comic-panel-sm w-full p-4 animate-slide-in"
                   style={{ animationDelay: `${i * 80}ms` }}
                 >
-                  <div className="flex items-start gap-3">
-                    <BookOpen className="mt-1 h-5 w-5 shrink-0 text-accent" />
-                    <div>
-                      <h4 className="font-bold text-foreground">{rec.title}</h4>
-                      <p className="mt-1 text-sm text-muted-foreground">{rec.description}</p>
-                      <p className="mt-1 text-sm italic text-foreground/80">"{rec.why}"</p>
+                  <button
+                    onClick={() => setSelectedMoreRec(rec)}
+                    className="w-full text-left transition-transform hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+                  >
+                    <div className="flex items-start gap-3">
+                      <BookOpen className="mt-1 h-5 w-5 shrink-0 text-accent" />
+                      <div>
+                        <h4 className="font-bold text-foreground">{rec.title}</h4>
+                        <p className="mt-1 text-sm text-foreground">{rec.description}</p>
+                        <p className="mt-1 text-sm italic text-foreground/80">"{rec.why}"</p>
+                      </div>
                     </div>
-                  </div>
+                  </button>
                 </div>
               ))}
             </div>
