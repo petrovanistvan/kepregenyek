@@ -29,7 +29,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
   const selectedRec = selectedMoreRec ?? (selectedIndex !== null ? result.recommendations[selectedIndex] : null);
 
   const generateAssets = async (
-    idx: number,
+    idx: string | number,
     rec: RecommendationResult["recommendations"][number],
     options?: { force?: boolean; silent?: boolean }
   ) => {
