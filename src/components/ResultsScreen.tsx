@@ -14,6 +14,7 @@ interface ResultsScreenProps {
 const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenProps) => {
   const [showReasoning, setShowReasoning] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const moreLikeThisRef = useRef<HTMLDivElement>(null);
   const [ttsPlaying, setTtsPlaying] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<Record<number, string>>({});
   const [imageLoading, setImageLoading] = useState<Record<number, boolean>>({});
