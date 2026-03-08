@@ -36,46 +36,41 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
     const force = options?.force ?? false;
     const silent = options?.silent ?? false;
 
-    if ((force || !generatedImages[idx]) && !imageLoading[idx]) {
-      setImageLoading((prev) => ({ ...prev, [idx]: true }));
-      let imageUrl: string | null = null;
+    // Run image and summary generation in parallel
+    const imagePromise = (force || !generatedImages[idx]) && !imageLoading[idx]
+      ? (async () => {
+          setImageLoading((prev) => ({ ...prev, [idx]: true }));
+          const { data, error } = await supabase.functions.invoke("generate-comic-image", {
+            body: { title: rec.title, summary: rec.summary || rec.description },
+          });
 
-      for (let attempt = 0; attempt < 2; attempt++) {
-        const { data, error } = await supabase.functions.invoke("generate-comic-image", {
-          body: { title: rec.title, summary: rec.summary || rec.description },
-        });
+          if (!error && data?.imageUrl) {
+            setGeneratedImages((prev) => ({ ...prev, [idx]: data.imageUrl as string }));
+          } else if (!silent) {
+            toast({
+              title: "Nem sikerült képet generálni",
+              description: "Próbáld újra az Újragenerálás gombbal.",
+              variant: "destructive",
+            });
+          }
+          setImageLoading((prev) => ({ ...prev, [idx]: false }));
+        })()
+      : Promise.resolve();
 
-        if (!error && data?.imageUrl) {
-          imageUrl = data.imageUrl;
-          break;
-        }
-      }
+    const summaryPromise = (force || !generatedSummaries[idx]) && !summaryLoading[idx]
+      ? (async () => {
+          setSummaryLoading((prev) => ({ ...prev, [idx]: true }));
+          const { data, error } = await supabase.functions.invoke("generate-comic-summary", {
+            body: { title: rec.title, description: rec.description, why: rec.why },
+          });
+          if (!error && data?.summary) {
+            setGeneratedSummaries((prev) => ({ ...prev, [idx]: data.summary }));
+          }
+          setSummaryLoading((prev) => ({ ...prev, [idx]: false }));
+        })()
+      : Promise.resolve();
 
-      if (imageUrl) {
-        setGeneratedImages((prev) => ({ ...prev, [idx]: imageUrl as string }));
-      } else if (!silent) {
-        toast({
-          title: "Nem sikerült képet generálni",
-          description: "Próbáld újra az Újragenerálás gombbal.",
-          variant: "destructive",
-        });
-      }
-
-      setImageLoading((prev) => ({ ...prev, [idx]: false }));
-    }
-
-    if ((force || !generatedSummaries[idx]) && !summaryLoading[idx]) {
-      setSummaryLoading((prev) => ({ ...prev, [idx]: true }));
-      const { data, error } = await supabase.functions.invoke("generate-comic-summary", {
-        body: { title: rec.title, description: rec.description, why: rec.why },
-      });
-
-      if (!error && data?.summary) {
-        setGeneratedSummaries((prev) => ({ ...prev, [idx]: data.summary }));
-      }
-
-      setSummaryLoading((prev) => ({ ...prev, [idx]: false }));
-    }
+    await Promise.all([imagePromise, summaryPromise]);
   };
 
   // Compute a stable key for the currently selected recommendation

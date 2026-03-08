@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX = 10;
+const RATE_LIMIT_MAX = 20;
 const ipHits = new Map<string, number[]>();
 
 function isRateLimited(ip: string): boolean {
@@ -125,7 +125,7 @@ Do NOT depict any trademarked or copyrighted characters. Instead, create origina
             messages: [{ role: "user", content: prompt }],
             modalities: ["image", "text"],
           }),
-          signal: AbortSignal.timeout(25000),
+          signal: AbortSignal.timeout(15000),
         }
       );
 

@@ -8,7 +8,7 @@ const corsHeaders = {
 
 // In-memory per-IP rate limiter: max 5 requests per 60 seconds
 const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_MAX = 20;
 const ipHits = new Map<string, number[]>();
 
 function isRateLimited(ip: string): boolean {
