@@ -16,19 +16,20 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const moreLikeThisRef = useRef<HTMLDivElement>(null);
   const [ttsPlaying, setTtsPlaying] = useState(false);
-  const [generatedImages, setGeneratedImages] = useState<Record<number, string>>({});
-  const [imageLoading, setImageLoading] = useState<Record<number, boolean>>({});
-  const [generatedSummaries, setGeneratedSummaries] = useState<Record<number, string>>({});
-  const [summaryLoading, setSummaryLoading] = useState<Record<number, boolean>>({});
+  const [generatedImages, setGeneratedImages] = useState<Record<string | number, string>>({});
+  const [imageLoading, setImageLoading] = useState<Record<string | number, boolean>>({});
+  const [generatedSummaries, setGeneratedSummaries] = useState<Record<string | number, string>>({});
+  const [summaryLoading, setSummaryLoading] = useState<Record<string | number, boolean>>({});
   const [moreLikeThis, setMoreLikeThis] = useState<Recommendation[] | null>(null);
   const [moreLikeThisLoading, setMoreLikeThisLoading] = useState<number | null>(null);
   const [moreLikeThisSource, setMoreLikeThisSource] = useState<string | null>(null);
+  const [selectedMoreRec, setSelectedMoreRec] = useState<Recommendation | null>(null);
 
   const { toast } = useToast();
-  const selectedRec = selectedIndex !== null ? result.recommendations[selectedIndex] : null;
+  const selectedRec = selectedMoreRec ?? (selectedIndex !== null ? result.recommendations[selectedIndex] : null);
 
   const generateAssets = async (
-    idx: number,
+    idx: string | number,
     rec: RecommendationResult["recommendations"][number],
     options?: { force?: boolean; silent?: boolean }
   ) => {
@@ -77,16 +78,19 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
     }
   };
 
-  useEffect(() => {
-    if (selectedIndex === null) return;
-    const rec = result.recommendations[selectedIndex];
-    void generateAssets(selectedIndex, rec, { silent: true });
-  }, [selectedIndex]);
+  // Compute a stable key for the currently selected recommendation
+  const modalKey = selectedMoreRec
+    ? `more-${selectedMoreRec.title}`
+    : selectedIndex !== null
+      ? selectedIndex
+      : null;
 
-  const currentSummary =
-    selectedIndex !== null
-      ? generatedSummaries[selectedIndex] || ""
-      : "";
+  useEffect(() => {
+    if (modalKey === null || !selectedRec) return;
+    void generateAssets(modalKey, selectedRec, { silent: true });
+  }, [modalKey]);
+
+  const currentSummary = modalKey !== null ? generatedSummaries[modalKey] || "" : "";
 
   const handleTts = (text: string) => {
     if (ttsPlaying) {
@@ -108,28 +112,28 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
     window.speechSynthesis.cancel();
     setTtsPlaying(false);
     setSelectedIndex(null);
+    setSelectedMoreRec(null);
   };
 
   const handleRegenerate = () => {
-    if (selectedIndex === null) return;
-    const idx = selectedIndex;
-    const rec = result.recommendations[idx];
+    if (modalKey === null || !selectedRec) return;
+    const key = modalKey;
 
     setGeneratedImages((prev) => {
       const n = { ...prev };
-      delete n[idx];
+      delete n[key];
       return n;
     });
     setGeneratedSummaries((prev) => {
       const n = { ...prev };
-      delete n[idx];
+      delete n[key];
       return n;
     });
 
     window.speechSynthesis.cancel();
     setTtsPlaying(false);
 
-    void generateAssets(idx, rec, { force: true });
+    void generateAssets(key, selectedRec, { force: true });
   };
 
   const handleMoreLikeThis = async (rec: Recommendation, cardIndex: number) => {
@@ -226,7 +230,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
       </div>
 
       {/* Detail overlay */}
-      {selectedRec && selectedIndex !== null && (
+      {selectedRec && modalKey !== null && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in"
           onClick={handleCloseModal}
@@ -246,14 +250,14 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
 
             {/* Generated image */}
             <div className="mb-4 aspect-[4/3] w-full overflow-hidden rounded-xl bg-muted flex items-center justify-center">
-              {imageLoading[selectedIndex] ? (
+              {imageLoading[modalKey] ? (
                 <div className="flex flex-col items-center gap-2 text-muted-foreground">
                   <Loader2 className="h-8 w-8 animate-spin" />
                   <span className="text-xs">Kép generálása…</span>
                 </div>
-              ) : generatedImages[selectedIndex] ? (
+              ) : generatedImages[modalKey] ? (
                 <img
-                  src={generatedImages[selectedIndex]}
+                  src={generatedImages[modalKey]}
                   alt={`${selectedRec.title} illusztráció`}
                   className="h-full w-full object-cover"
                 />
@@ -275,7 +279,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
                 </h3>
                 <button
                   onClick={() => handleTts(currentSummary)}
-                  disabled={summaryLoading[selectedIndex]}
+                  disabled={summaryLoading[modalKey]}
                   className="flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
                 >
                   {ttsPlaying ? (
@@ -286,7 +290,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
                   {ttsPlaying ? "Leállítás" : "Felolvasás"}
                 </button>
               </div>
-              {summaryLoading[selectedIndex] || (!currentSummary && !summaryLoading[selectedIndex] && selectedIndex !== null) ? (
+              {summaryLoading[modalKey] || (!currentSummary && !summaryLoading[modalKey] && modalKey !== null) ? (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   <span>Ismertető generálása…</span>
@@ -312,10 +316,10 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
             <div className="mt-4 flex justify-center">
               <button
                 onClick={handleRegenerate}
-                disabled={imageLoading[selectedIndex] || summaryLoading[selectedIndex]}
+                disabled={imageLoading[modalKey] || summaryLoading[modalKey]}
                 className="flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
               >
-                <RefreshCw className={`h-4 w-4 ${imageLoading[selectedIndex] || summaryLoading[selectedIndex] ? "animate-spin" : ""}`} />
+                <RefreshCw className={`h-4 w-4 ${imageLoading[modalKey] || summaryLoading[modalKey] ? "animate-spin" : ""}`} />
                 Újragenerálás
               </button>
             </div>
@@ -340,17 +344,22 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
               {moreLikeThis?.map((rec, i) => (
                 <div
                   key={i}
-                  className="comic-panel-sm p-4 animate-slide-in"
+                  className="comic-panel-sm w-full p-4 animate-slide-in"
                   style={{ animationDelay: `${i * 80}ms` }}
                 >
-                  <div className="flex items-start gap-3">
-                    <BookOpen className="mt-1 h-5 w-5 shrink-0 text-accent" />
-                    <div>
-                      <h4 className="font-bold text-foreground">{rec.title}</h4>
-                      <p className="mt-1 text-sm text-muted-foreground">{rec.description}</p>
-                      <p className="mt-1 text-sm italic text-foreground/80">"{rec.why}"</p>
+                  <button
+                    onClick={() => setSelectedMoreRec(rec)}
+                    className="w-full text-left transition-transform hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+                  >
+                    <div className="flex items-start gap-3">
+                      <BookOpen className="mt-1 h-5 w-5 shrink-0 text-accent" />
+                      <div>
+                        <h4 className="font-bold text-foreground">{rec.title}</h4>
+                        <p className="mt-1 text-sm text-foreground">{rec.description}</p>
+                        <p className="mt-1 text-sm italic text-foreground/80">"{rec.why}"</p>
+                      </div>
                     </div>
-                  </div>
+                  </button>
                 </div>
               ))}
             </div>
