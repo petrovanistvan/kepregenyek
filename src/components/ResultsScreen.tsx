@@ -19,6 +19,9 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
   const [imageLoading, setImageLoading] = useState<Record<number, boolean>>({});
   const [generatedSummaries, setGeneratedSummaries] = useState<Record<number, string>>({});
   const [summaryLoading, setSummaryLoading] = useState<Record<number, boolean>>({});
+  const [moreLikeThis, setMoreLikeThis] = useState<Recommendation[] | null>(null);
+  const [moreLikeThisLoading, setMoreLikeThisLoading] = useState(false);
+  const [moreLikeThisSource, setMoreLikeThisSource] = useState<string | null>(null);
 
   const { toast } = useToast();
   const selectedRec = selectedIndex !== null ? result.recommendations[selectedIndex] : null;
