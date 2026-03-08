@@ -109,6 +109,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
     window.speechSynthesis.cancel();
     setTtsPlaying(false);
     setSelectedIndex(null);
+    setSelectedMoreRec(null);
   };
 
   const handleRegenerate = () => {
