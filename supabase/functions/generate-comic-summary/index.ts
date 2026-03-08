@@ -29,13 +29,13 @@ function extractBearerToken(req: Request): string | null {
 }
 
 function isAuthorized(req: Request): boolean {
+  const anonKeyFallback = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ6cGZ1amdzbW55bGxkeW5iZW5hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3NDE1NjgsImV4cCI6MjA4NzMxNzU2OH0._EQY1Uix5-29F3njLbaLT9q3fTrQxPkok_9ILeb9Eh0";
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY")?.trim();
   const publishableKey = Deno.env.get("SUPABASE_PUBLISHABLE_KEY")?.trim();
   const apikey = req.headers.get("apikey")?.trim();
   const bearerToken = extractBearerToken(req);
 
-  const allowed = new Set([anonKey, publishableKey].filter((v): v is string => Boolean(v)));
-  if (allowed.size === 0) return false;
+  const allowed = new Set([anonKey, publishableKey, anonKeyFallback].filter((v): v is string => Boolean(v)));
 
   return Boolean(
     (apikey && allowed.has(apikey)) ||
