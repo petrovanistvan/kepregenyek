@@ -23,14 +23,33 @@ function isRateLimited(ip: string): boolean {
   return false;
 }
 
+function extractBearerToken(req: Request): string | null {
+  const authHeader = req.headers.get("authorization") || req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return null;
+  return authHeader.slice(7).trim();
+}
+
+function isAuthorized(req: Request): boolean {
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY")?.trim();
+  const publishableKey = Deno.env.get("SUPABASE_PUBLISHABLE_KEY")?.trim();
+  const apikey = req.headers.get("apikey")?.trim();
+  const bearerToken = extractBearerToken(req);
+
+  const allowed = new Set([anonKey, publishableKey].filter((v): v is string => Boolean(v)));
+  if (allowed.size === 0) return false;
+
+  return Boolean(
+    (apikey && allowed.has(apikey)) ||
+    (bearerToken && allowed.has(bearerToken))
+  );
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const apikey = req.headers.get('apikey');
-  const expectedKey = Deno.env.get("SUPABASE_ANON_KEY");
-  if (!apikey || apikey !== expectedKey) {
+  if (!isAuthorized(req)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -50,14 +69,26 @@ serve(async (req) => {
     const { answers, questions } = body;
 
     // Input validation
-    if (!answers || typeof answers !== "object" || !Array.isArray(questions)) {
+    if (!answers || typeof answers !== "object" || Array.isArray(answers) || !Array.isArray(questions)) {
       return new Response(JSON.stringify({ error: "Invalid input" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
     if (questions.length > 20) {
       return new Response(JSON.stringify({ error: "Too many questions" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const allQuestionsValid = questions.every(
+      (q: any) => q && typeof q.id === "string" && typeof q.text === "string" && q.id.length <= 100 && q.text.length <= 500
+    );
+
+    if (!allQuestionsValid) {
+      return new Response(JSON.stringify({ error: "Invalid question payload" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -123,6 +154,7 @@ Válaszolj KIZÁRÓLAG az alábbi JSON formátumban, semmi más szöveget ne adj
             { role: "user", content: prompt },
           ],
         }),
+        signal: AbortSignal.timeout(20000),
       }
     );
 
@@ -147,13 +179,26 @@ Válaszolj KIZÁRÓLAG az alábbi JSON formátumban, semmi más szöveget ne adj
     const data = await response.json();
     let content = data.choices?.[0]?.message?.content ?? "";
     content = content.replace(/```json\s*/gi, "").replace(/```\s*/gi, "").trim();
-    const parsed = JSON.parse(content);
+
+    let parsed: any;
+    try {
+      parsed = JSON.parse(content);
+    } catch {
+      throw new Error("Invalid AI JSON response");
+    }
 
     return new Response(JSON.stringify(parsed), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (e) {
+  } catch (e: any) {
+    if (e?.name === "TimeoutError" || e?.name === "AbortError") {
+      return new Response(
+        JSON.stringify({ error: "Recommendation service timeout, please try again." }),
+        { status: 504, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     console.error("generate-recommendations error:", e);
     return new Response(
       JSON.stringify({ error: "Recommendation service error, please try again." }),
