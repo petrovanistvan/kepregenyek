@@ -230,16 +230,6 @@ supabase/functions/
               </ul>
             </div>
 
-            <div className="rounded-lg border border-border p-4">
-              <h3 className="mb-2 text-lg font-semibold text-foreground">7.5 elevenlabs-tts</h3>
-              <p className="mb-2 text-sm text-foreground/90">Szöveg-hang konverzió az ElevenLabs API-n keresztül (többnyelvű v2 modell).</p>
-              <ul className="list-disc pl-6 text-sm text-foreground/80 space-y-1">
-                <li><strong>Input:</strong> <code className="rounded bg-muted px-1 text-xs">{`{ text, voiceId? }`}</code></li>
-                <li><strong>Output:</strong> audio/mpeg bináris</li>
-                <li><strong>Szükséges secret:</strong> ELEVENLABS_API_KEY</li>
-                <li><strong>Megjegyzés:</strong> Jelenleg a frontend a Web Speech API-t használja, ez a function tartalék</li>
-              </ul>
-            </div>
           </div>
         </section>
 
