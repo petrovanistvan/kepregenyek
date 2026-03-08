@@ -322,7 +322,7 @@ supabase/functions/
                 <tr className="border-b border-border/50"><td className="py-2 pr-4 font-mono text-xs">VITE_SUPABASE_URL</td><td className="py-2 pr-4">Publikus</td><td className="py-2">Backend API URL</td></tr>
                 <tr className="border-b border-border/50"><td className="py-2 pr-4 font-mono text-xs">VITE_SUPABASE_PUBLISHABLE_KEY</td><td className="py-2 pr-4">Publikus</td><td className="py-2">Anon/publishable API kulcs</td></tr>
                 <tr className="border-b border-border/50"><td className="py-2 pr-4 font-mono text-xs">LOVABLE_API_KEY</td><td className="py-2 pr-4">Secret (backend)</td><td className="py-2">AI Gateway hozzáférés (Edge Functions-ben)</td></tr>
-                <tr><td className="py-2 pr-4 font-mono text-xs">ELEVENLABS_API_KEY</td><td className="py-2 pr-4">Secret (backend)</td><td className="py-2">ElevenLabs TTS API (opcionális)</td></tr>
+                
               </tbody>
             </table>
           </div>
