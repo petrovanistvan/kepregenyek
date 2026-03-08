@@ -280,7 +280,7 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
                 </h3>
                 <button
                   onClick={() => handleTts(currentSummary)}
-                  disabled={summaryLoading[selectedIndex]}
+                  disabled={summaryLoading[modalKey]}
                   className="flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
                 >
                   {ttsPlaying ? (
