@@ -46,13 +46,27 @@ function isAuthorized(req: Request): boolean {
 function extractImageUrl(data: any): string | null {
   const message = data?.choices?.[0]?.message;
 
+  // Check images array (standard Lovable AI response format)
   const fromImages = message?.images?.[0]?.image_url?.url;
   if (fromImages && typeof fromImages === "string") return fromImages;
 
+  // Check content array for image_url parts
   const content = Array.isArray(message?.content) ? message.content : [];
   const imagePart = content.find((item: any) => item?.type === "image_url");
   const fromContent = imagePart?.image_url?.url;
   if (fromContent && typeof fromContent === "string") return fromContent;
+
+  // Check if content itself is a base64 data URL string
+  if (typeof message?.content === "string" && message.content.startsWith("data:image")) {
+    return message.content;
+  }
+
+  // Check inline_data format (Gemini native)
+  const inlinePart = content.find((item: any) => item?.inline_data?.mime_type?.startsWith("image/"));
+  if (inlinePart?.inline_data?.data) {
+    const mime = inlinePart.inline_data.mime_type || "image/png";
+    return `data:${mime};base64,${inlinePart.inline_data.data}`;
+  }
 
   return null;
 }
@@ -148,8 +162,20 @@ Do NOT depict any trademarked or copyrighted characters. Instead, create origina
       }
 
       const data = await response.json();
+      console.log(`Response structure (${model}):`, JSON.stringify(Object.keys(data?.choices?.[0]?.message || {})));
+      if (data?.choices?.[0]?.message?.images) {
+        console.log("Images array found, length:", data.choices[0].message.images.length);
+      }
+      if (Array.isArray(data?.choices?.[0]?.message?.content)) {
+        console.log("Content types:", data.choices[0].message.content.map((c: any) => c?.type));
+      }
       imageUrl = extractImageUrl(data);
-      if (imageUrl) break;
+      if (imageUrl) {
+        console.log(`Image extracted successfully from ${model}, URL starts with:`, imageUrl.substring(0, 30));
+        break;
+      } else {
+        console.warn(`No image URL extracted from ${model} response`);
+      }
     }
 
     if (!imageUrl) {
