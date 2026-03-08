@@ -14,11 +14,15 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card py-4">
-        <div className="container flex items-center justify-center gap-3">
-          <BookOpen className="h-7 w-7 text-accent" />
-          <h1 className="text-2xl font-bold tracking-tight">
-            DC / Marvel Ajánló
-          </h1>
+        <div className="container flex items-center justify-between">
+          <div className="w-10" />
+          <div className="flex items-center gap-3">
+            <BookOpen className="h-7 w-7 text-accent" />
+            <h1 className="text-2xl font-bold tracking-tight">
+              DC / Marvel Ajánló
+            </h1>
+          </div>
+          <ThemeToggle />
         </div>
       </header>
 
