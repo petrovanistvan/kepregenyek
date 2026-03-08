@@ -19,21 +19,20 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const prompt = `Create a premium, detailed comic-book illustration for this EXACT comic: "${title}".
-Story context: ${summary}
+    // Use a generic artistic prompt to avoid copyright refusals
+    const prompt = `Create a dramatic, cinematic digital painting inspired by the concept: "${title}".
+Context: ${summary || title}
 
-Critical requirements:
-- The visual must match the title and story context above.
-- If the title references a specific superhero/team, depict that exact hero/team with recognizable costume colors and silhouette.
-- Composition must be horizontal 4:3, full-bleed, edge-to-edge artwork that fills the entire frame.
-- No text, speech bubbles, captions, logos, watermarks, or borders.
-- Cinematic lighting, dynamic action, high detail, modern comic art style.`;
+Style: Bold comic-book inspired art with dramatic lighting, vivid colors, dynamic composition.
+Format: Horizontal 4:3, full-bleed artwork filling the entire frame.
+Important: Do NOT include any text, speech bubbles, logos, watermarks, or borders. This is purely visual art.
+Do NOT depict any trademarked or copyrighted characters. Instead, create original characters inspired by the theme and mood.`;
 
-    const fallbackPrompt = `Comic illustration for "${title}". Match the title faithfully, use horizontal 4:3 full-frame composition, and avoid all text/logos/watermarks.`;
-
+    const models = ["google/gemini-2.5-flash-image", "google/gemini-3-pro-image-preview"];
     let imageUrl: string | null = null;
 
-    for (const activePrompt of [prompt, fallbackPrompt]) {
+    for (const model of models) {
+      console.log(`Trying model: ${model}`);
       const response = await fetch(
         "https://ai.gateway.lovable.dev/v1/chat/completions",
         {
@@ -43,8 +42,8 @@ Critical requirements:
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: "google/gemini-3-pro-image-preview",
-            messages: [{ role: "user", content: activePrompt }],
+            model,
+            messages: [{ role: "user", content: prompt }],
             modalities: ["image", "text"],
           }),
         }
@@ -64,18 +63,28 @@ Critical requirements:
           );
         }
         const t = await response.text();
-        console.error("AI gateway error:", response.status, t);
-        throw new Error(`AI gateway error: ${response.status}`);
+        console.error(`AI gateway error (${model}):`, response.status, t);
+        continue; // try next model
       }
 
       const data = await response.json();
-      imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url ?? null;
+      console.log(`Response from ${model}:`, JSON.stringify({
+        hasChoices: !!data.choices,
+        hasImages: !!data.choices?.[0]?.message?.images,
+        imageCount: data.choices?.[0]?.message?.images?.length ?? 0,
+        contentPreview: data.choices?.[0]?.message?.content?.substring(0, 200),
+      }));
 
+      imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url ?? null;
       if (imageUrl) break;
     }
 
     if (!imageUrl) {
-      throw new Error("No image returned from AI model");
+      // Return a graceful fallback instead of 500
+      return new Response(
+        JSON.stringify({ imageUrl: null, error: "Image generation unavailable" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     return new Response(
