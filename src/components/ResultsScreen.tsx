@@ -116,25 +116,24 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
   };
 
   const handleRegenerate = () => {
-    if (selectedIndex === null) return;
-    const idx = selectedIndex;
-    const rec = result.recommendations[idx];
+    if (modalKey === null || !selectedRec) return;
+    const key = modalKey;
 
     setGeneratedImages((prev) => {
       const n = { ...prev };
-      delete n[idx];
+      delete n[key];
       return n;
     });
     setGeneratedSummaries((prev) => {
       const n = { ...prev };
-      delete n[idx];
+      delete n[key];
       return n;
     });
 
     window.speechSynthesis.cancel();
     setTtsPlaying(false);
 
-    void generateAssets(idx, rec, { force: true });
+    void generateAssets(key, selectedRec, { force: true });
   };
 
   const handleMoreLikeThis = async (rec: Recommendation, cardIndex: number) => {
