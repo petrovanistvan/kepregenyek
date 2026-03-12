@@ -37,6 +37,46 @@ export function useRecommender(): UseRecommenderReturn {
   const [result, setResult] = useState<RecommendationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Enrich recommendations with details from comic_database.json
+  const enrichWithDetails = async (recs: RecommendationResult): Promise<RecommendationResult> => {
+    try {
+      const res = await fetch("/engine/comic_database.json");
+      if (!res.ok) return recs;
+      const comics: any[] = await res.json();
+
+      const comicMap = new Map<string, any>();
+      for (const c of comics) {
+        comicMap.set(c.title?.toLowerCase(), c);
+      }
+
+      const enriched = recs.recommendations.map((rec) => {
+        if (rec.details?.price_per_page) return rec; // already has details
+        const match = comicMap.get(rec.title?.toLowerCase());
+        if (!match) return rec;
+
+        const pages = match.pages || 0;
+        const price = match.price_huf || 0;
+        const rating = match.rating || 0;
+        const ppp = pages > 0 && price > 0 ? Math.round((price / pages) * 100) / 100 : null;
+        const roi = price > 0 ? Math.round(((rating * pages) / price) * 10000) / 10000 : 0;
+        const chars = (match.characters || []).join(", ");
+
+        return {
+          ...rec,
+          details: {
+            price_per_page: ppp ? `${ppp} Ft/oldal` : undefined,
+            roi,
+            characters: chars || undefined,
+          },
+        };
+      });
+
+      return { ...recs, recommendations: enriched };
+    } catch {
+      return recs;
+    }
+  };
+
   const getRecommendationsFromAI = async (
     answers: Record<string, boolean>
   ): Promise<RecommendationResult> => {
