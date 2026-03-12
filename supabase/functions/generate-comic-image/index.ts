@@ -121,27 +121,28 @@ Format: Horizontal 4:3, full-bleed artwork filling the entire frame.
 Important: Do NOT include any text, speech bubbles, logos, watermarks, or borders. This is purely visual art.
 Do NOT depict any trademarked or copyrighted characters. Instead, create original characters inspired by the theme and mood.`;
 
-    const models = ["google/gemini-2.5-flash-image", "google/gemini-3-pro-image-preview"];
+    const models = ["google/gemini-3.1-flash-image-preview", "google/gemini-3-pro-image-preview"];
     let imageUrl: string | null = null;
 
     for (const model of models) {
       console.log(`Trying model: ${model}`);
-      const response = await fetch(
-        "https://ai.gateway.lovable.dev/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model,
-            messages: [{ role: "user", content: prompt }],
-            modalities: ["image", "text"],
-          }),
-          signal: AbortSignal.timeout(15000),
-        }
-      );
+      try {
+        const response = await fetch(
+          "https://ai.gateway.lovable.dev/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${LOVABLE_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model,
+              messages: [{ role: "user", content: prompt }],
+              modalities: ["image", "text"],
+            }),
+            signal: AbortSignal.timeout(55000),
+          }
+        );
 
       if (!response.ok) {
         if (response.status === 429) {
@@ -163,18 +164,16 @@ Do NOT depict any trademarked or copyrighted characters. Instead, create origina
 
       const data = await response.json();
       console.log(`Response structure (${model}):`, JSON.stringify(Object.keys(data?.choices?.[0]?.message || {})));
-      if (data?.choices?.[0]?.message?.images) {
-        console.log("Images array found, length:", data.choices[0].message.images.length);
-      }
-      if (Array.isArray(data?.choices?.[0]?.message?.content)) {
-        console.log("Content types:", data.choices[0].message.content.map((c: any) => c?.type));
-      }
       imageUrl = extractImageUrl(data);
       if (imageUrl) {
-        console.log(`Image extracted successfully from ${model}, URL starts with:`, imageUrl.substring(0, 30));
+        console.log(`Image extracted successfully from ${model}`);
         break;
       } else {
         console.warn(`No image URL extracted from ${model} response`);
+      }
+      } catch (modelErr: any) {
+        console.warn(`Model ${model} failed:`, modelErr?.name || modelErr?.message);
+        continue;
       }
     }
 
