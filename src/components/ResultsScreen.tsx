@@ -314,11 +314,6 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
             </div>
             {selectedRec.details && (
               <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                {selectedRec.details.characters && (
-                  <span className="rounded-full bg-muted px-3 py-1">
-                    🦸 {selectedRec.details.characters}
-                  </span>
-                )}
                 {selectedRec.details.price_per_page && (
                   <span className="rounded-full bg-muted px-3 py-1">
                     💰 {selectedRec.details.price_per_page}
@@ -327,6 +322,11 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
                 {selectedRec.details.roi !== undefined && selectedRec.details.roi > 0 && (
                   <span className="rounded-full bg-muted px-3 py-1">
                     📊 ROI: {selectedRec.details.roi}
+                  </span>
+                )}
+                {selectedRec.details.characters && (
+                  <span className="rounded-full bg-muted px-3 py-1">
+                    🦸 {selectedRec.details.characters}
                   </span>
                 )}
               </div>
