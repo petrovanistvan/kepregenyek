@@ -230,6 +230,18 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
         ))}
       </div>
 
+      {/* ROI formula disclaimer */}
+      <div className="mt-4 rounded-lg border border-border bg-card p-4 text-xs text-muted-foreground">
+        <p className="font-semibold mb-1">📊 ROI mutató – hogyan számoljuk?</p>
+        <p>
+          <span className="font-mono bg-muted px-1.5 py-0.5 rounded">ROI = (értékelés × oldalszám) / ár (Ft)</span>
+        </p>
+        <p className="mt-1">
+          A magasabb ROI azt jelzi, hogy az adott kötet az árához képest több és jobban értékelt tartalmat kínál. 
+          Az ár/oldal mutató (<span className="font-mono bg-muted px-1 py-0.5 rounded">ár ÷ oldalszám</span>) az oldalankénti költséget mutatja forintban.
+        </p>
+      </div>
+
       {/* Detail overlay */}
       {selectedRec && modalKey !== null && (
         <div
