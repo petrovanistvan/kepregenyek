@@ -191,6 +191,25 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
                   <p className="mt-2 text-sm font-medium italic text-foreground/80">
                     "{rec.why}"
                   </p>
+                  {rec.details && (
+                    <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                      {rec.details.price_per_page && (
+                        <span className="rounded-full bg-muted px-2.5 py-0.5">
+                          💰 {rec.details.price_per_page}
+                        </span>
+                      )}
+                      {rec.details.roi !== undefined && rec.details.roi > 0 && (
+                        <span className="rounded-full bg-muted px-2.5 py-0.5">
+                          📊 ROI: {rec.details.roi}
+                        </span>
+                      )}
+                      {rec.details.characters && (
+                        <span className="rounded-full bg-muted px-2.5 py-0.5">
+                          🦸 {rec.details.characters}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </button>
