@@ -121,27 +121,28 @@ Format: Horizontal 4:3, full-bleed artwork filling the entire frame.
 Important: Do NOT include any text, speech bubbles, logos, watermarks, or borders. This is purely visual art.
 Do NOT depict any trademarked or copyrighted characters. Instead, create original characters inspired by the theme and mood.`;
 
-    const models = ["google/gemini-2.5-flash-image", "google/gemini-3-pro-image-preview"];
+    const models = ["google/gemini-3.1-flash-image-preview", "google/gemini-3-pro-image-preview"];
     let imageUrl: string | null = null;
 
     for (const model of models) {
       console.log(`Trying model: ${model}`);
-      const response = await fetch(
-        "https://ai.gateway.lovable.dev/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model,
-            messages: [{ role: "user", content: prompt }],
-            modalities: ["image", "text"],
-          }),
-          signal: AbortSignal.timeout(15000),
-        }
-      );
+      try {
+        const response = await fetch(
+          "https://ai.gateway.lovable.dev/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${LOVABLE_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model,
+              messages: [{ role: "user", content: prompt }],
+              modalities: ["image", "text"],
+            }),
+            signal: AbortSignal.timeout(55000),
+          }
+        );
 
       if (!response.ok) {
         if (response.status === 429) {
