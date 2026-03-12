@@ -126,7 +126,7 @@ export function useRecommender(): UseRecommenderReturn {
           ),
         ]);
 
-        setResult(aiResult);
+        setResult(await enrichWithDetails(aiResult));
       } catch (aiErr: any) {
         console.warn("AI recommendation failed, falling back to Pyodide:", aiErr.message);
         try {
