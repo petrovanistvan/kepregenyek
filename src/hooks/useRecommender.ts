@@ -90,6 +90,15 @@ export function useRecommender(): UseRecommenderReturn {
     return data as RecommendationResult;
   };
 
+  const hasEconomicDetails = (recs: RecommendationResult): boolean => {
+    return recs.recommendations.every(
+      (rec) =>
+        Boolean(rec.details?.price_per_page) &&
+        typeof rec.details?.roi === "number" &&
+        Boolean(rec.details?.characters)
+    );
+  };
+
   const getRecommendationsFromPyodide = async (
     answers: Record<string, boolean>
   ): Promise<RecommendationResult> => {
@@ -126,7 +135,14 @@ export function useRecommender(): UseRecommenderReturn {
           ),
         ]);
 
-        setResult(await enrichWithDetails(aiResult));
+        const enrichedAiResult = await enrichWithDetails(aiResult);
+
+        // Guarantee economic signals (price/page + ROI + characters) on cards.
+        if (!hasEconomicDetails(enrichedAiResult)) {
+          throw new Error("AI recommendation missing economic details");
+        }
+
+        setResult(enrichedAiResult);
       } catch (aiErr: any) {
         console.warn("AI recommendation failed, falling back to Pyodide:", aiErr.message);
         try {
