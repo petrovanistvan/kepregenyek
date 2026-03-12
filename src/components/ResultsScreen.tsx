@@ -324,6 +324,11 @@ const ResultsScreen = ({ result, answers, questions, onRestart }: ResultsScreenP
                     💰 {selectedRec.details.price_per_page}
                   </span>
                 )}
+                {selectedRec.details.roi !== undefined && selectedRec.details.roi > 0 && (
+                  <span className="rounded-full bg-muted px-3 py-1">
+                    📊 ROI: {selectedRec.details.roi}
+                  </span>
+                )}
               </div>
             )}
             <div className="mt-4 flex justify-center">
